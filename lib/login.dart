@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:BackOut/main.dart';
 
 // Define a custom Form widget.
 class Login extends StatefulWidget {
