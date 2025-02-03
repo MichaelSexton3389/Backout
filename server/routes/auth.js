@@ -67,19 +67,10 @@ authRouter.post("/api/signin", async (req,res) => {
     }
     catch (e) {
         res
-            .status()
+            .status(500)
             .json({error: e.message})
     }
-
-
-
-
-
 })
-
-
-
-
 
 
 module.exports = authRouter;
