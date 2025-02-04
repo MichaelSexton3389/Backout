@@ -4,7 +4,7 @@ import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   void signOutUser(BuildContext context) {
     //AuthService().signOut(context);
@@ -24,11 +24,11 @@ class HomeScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () => signOutUser(context),
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
-              textStyle: MaterialStateProperty.all(
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
+              textStyle: WidgetStateProperty.all(
                 const TextStyle(color: Colors.white),
               ),
-              minimumSize: MaterialStateProperty.all(
+              minimumSize: WidgetStateProperty.all(
                 Size(MediaQuery.of(context).size.width / 2.5, 50),
               ),
             ),

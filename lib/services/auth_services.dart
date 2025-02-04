@@ -19,13 +19,19 @@ class AuthService {
       User user =
           User(id: '', name: name, email: email, token: '', password: password);
 
+      print('Sending request to: ${Constants.uri}/api/signup');
+print('Request body: ${jsonEncode(user.toMap())}');
+
       http.Response res = await http.post(
         Uri.parse('${Constants.uri}/api/signup'),
-        body: user.toJson(),
+        body: jsonEncode(user.toMap()),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
+
+       print('Sending request to: ${Constants.uri}/api/signup');
+    print('Request body: ${jsonEncode(user.toMap())}');
 
       httpErrorHandle(
           response: res,
@@ -34,7 +40,12 @@ class AuthService {
             showSnackBar(
                 context, 'Account created! Login with the same credentials');
           });
+
+           print('Response status code: ${res.statusCode}');
+    print('Response body: ${res.body}');
+
     } catch (e) {
+      print('Error: $e');
       showSnackBar(context, e.toString());
     }
   }
@@ -51,7 +62,7 @@ class AuthService {
           Uri.parse('${Constants.uri}/api/signin'),
           body: jsonEncode({'email': email, 'password': password}),
           headers: <String, String>{
-            'Conent-Type': 'application/json; charset=UTF-8'
+            'Content-Type': 'application/json; charset=UTF-8'
           });
 
       httpErrorHandle(

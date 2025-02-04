@@ -5,7 +5,7 @@ import 'package:BackOut/screens/home_screen.dart';
 import 'package:BackOut/services/auth_services.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({Key? key}) : super(key: key);
+  const SignupScreen({super.key});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -64,11 +64,11 @@ class _SignupScreenState extends State<SignupScreen> {
           ElevatedButton(
             onPressed: signupUser,
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
-              textStyle: MaterialStateProperty.all(
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
+              textStyle: WidgetStateProperty.all(
                 const TextStyle(color: Colors.white),
               ),
-              minimumSize: MaterialStateProperty.all(
+              minimumSize: WidgetStateProperty.all(
                 Size(MediaQuery.of(context).size.width / 2.5, 50),
               ),
             ),

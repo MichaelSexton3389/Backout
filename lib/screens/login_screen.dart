@@ -3,7 +3,7 @@ import 'package:BackOut/custom_textfield.dart';
 import 'package:BackOut/services/auth_services.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -52,11 +52,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ElevatedButton(
             onPressed: loginUser,
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(Colors.blue),
-              textStyle: MaterialStateProperty.all(
+              backgroundColor: WidgetStateProperty.all(Colors.blue),
+              textStyle: WidgetStateProperty.all(
                 const TextStyle(color: Colors.white),
               ),
-              minimumSize: MaterialStateProperty.all(
+              minimumSize: WidgetStateProperty.all(
                 Size(MediaQuery.of(context).size.width / 2.5, 50),
               ),
             ),

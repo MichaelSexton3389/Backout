@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/MichaelSexton3389/Backout/issues"
   },
-  "homepage": "https://github.com/MichaelSexton3389/Backout#readme"
+  "homepage": "https://github.com/MichaelSexton3389/Backout#readme",
+  "dependencies": {
+    "cors": "^2.8.5"
+  }
 }

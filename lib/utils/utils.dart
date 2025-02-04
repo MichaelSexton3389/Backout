@@ -15,6 +15,8 @@ void httpErrorHandle({
   required BuildContext context,
   required VoidCallback onSuccess,
 }) {
+  print('Status code: ${response.statusCode}');
+  print('Response body: ${response.body}');
   switch (response.statusCode) {
     case 200:
       onSuccess();

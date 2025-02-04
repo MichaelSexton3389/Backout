@@ -8,7 +8,7 @@ const authRouter = express.Router();
 // Sign up route -> WORKING 
 
 authRouter.post("/api/signup", async (req, res) =>  {
-
+    console.log("Received signup request: ", req.body);
 
     try {
         const {name, email, password} = req.body;

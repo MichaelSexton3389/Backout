@@ -6,7 +6,7 @@ import 'package:BackOut/screens/signup_screen.dart';
 import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() { 
   runApp(
     MultiProvider(
       providers: [
@@ -18,7 +18,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
