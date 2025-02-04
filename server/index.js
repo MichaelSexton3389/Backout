@@ -10,7 +10,9 @@ app.use(express.json());
 app.use(cors());  
 app.use(authRouter);
 
-const DB = "mongodb+srv://mise3389:nqMGBHs8fgtS4u0J@cluster1.d6p3k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
+
+// CHANGE USERNAME AND PASSWORD FOR YOUR OWN!
+const DB = "mongodb+srv://{USERNAME}:{PASSWORD}}@cluster1.d6p3k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
 
 mongoose
     .connect(DB)
