@@ -1,62 +1,46 @@
-import 'package:english_words/english_words.dart';
+import 'package:BackOut/screens/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:BackOut/providers/user_providers.dart';
+import 'package:BackOut/screens/login_screen.dart';
+import 'package:BackOut/screens/signup_screen.dart';
+import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(MainApp());
+void main() { 
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final AuthService authService = AuthService();
+
+  @override
+  void initState() {
+    super.initState();
+    //authService.getUserData(context);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'BackOut',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 18, 45, 10)),
-        ),
-        home: MyHomePage(),
+    return MaterialApp(
+      title: 'Flutter Node Auth',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
-    );
-  }
-}
-
-class MyAppState extends ChangeNotifier {
-
-  //TO DO -> BEHAVIOR FOR LOGIN
-  var current = WordPair.random();
-
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text('A random idea:'),
-          Text(appState.current.asLowerCase),
-          ElevatedButton(
-            onPressed: () {
-              appState.getNext();
-            },
-            child: Text('Login'),
-          ),
-        ],
-      ),
+      home: Provider.of<UserProvider>(context).user.token.isEmpty ? const SignupScreen() : const HomeScreen(),
     );
   }
 }

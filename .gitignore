@@ -43,3 +43,29 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Ignore binary files
+*.bin
+*.exe
+*.dll
+*.o
+*.so
+*.dylib
+*.a
+*.out
+*.obj
+
+# Ignore compiled TypeScript and JavaScript binaries
+/dist/
+/out/
+/target/
+
+# Ignore Node.js binaries and artifacts
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+/pnpm-debug.log
+
+# Ignore system-generated files
+Thumbs.db
+ehthumbs.db
