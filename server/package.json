@@ -1,15 +1,14 @@
 {
-  "name": "server",
+  "name": "express",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev":"nodemon ./index.js",
+    "dev": "nodemon ./index.js",
     "start": "node ./index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "express": "^4.21.2",
@@ -18,5 +17,6 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
-  }
+  },
+  "description": ""
 }
