@@ -12,6 +12,7 @@ const userSchema = mongoose.Schema({
     },
     email : {
         required: true,
+        unique: true,
         type: String,
         trim: true,
         validate: { 
@@ -26,7 +27,19 @@ const userSchema = mongoose.Schema({
     password : {
         required: true,
         type: String
-    }
+    },
+    profile_picture: {
+        type: String,
+        default:'' //setup a default image?
+    },
+    bio: {
+    type: String,
+    default: ''
+    },
+    created_at: {
+        type: Date,
+        default: Date.now
+  }
 });
 
 
