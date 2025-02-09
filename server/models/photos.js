@@ -12,7 +12,7 @@ const photoSchema = new Schema({
     ref: 'Activity', // References the Activity model
     required: true
   },
-  image_url: {
+  image_path: {
     type: String,
     default: '' // URL to the photo
   },
