@@ -2,12 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:BackOut/providers/user_providers.dart';
 import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
+import 'package:BackOut/screens/ProfileScreen.dart';
+import 'package:BackOut/widgets/activity_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
-  void signOutUser(BuildContext context) {
-    //AuthService().signOut(context);
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentActivityIndex = 0;
+
+  final List<Map<String, String>> activities = [
+    {
+      "title": "Hiking at Chautauqua",
+      "date": "Saturday, Nov 3",
+      "time": "8 AM",
+      "location": "Chautauqua Trail Start",
+      "imageUrl":
+          "https://live.staticflickr.com/3500/3845264221_1435f80f18_c.jpg",
+      "description": "Perfect day to explore the Flatirons!"
+    },
+    {
+      "title": "Sunset Yoga",
+      "date": "Sunday, Nov 4",
+      "time": "6 PM",
+      "location": "Boulder Creek Park",
+      "imageUrl":
+          "https://live.staticflickr.com/7381/12369616423_2a5d035436_c.jpg",
+      "description": "Relax and unwind with an evening yoga session."
+    },
+    {
+      "title": "Rock Climbing",
+      "date": "Monday, Nov 5",
+      "time": "10 AM",
+      "location": "Eldorado Canyon",
+      "imageUrl":
+          "https://live.staticflickr.com/1568/25281518844_3ea51e32ef_c.jpg",
+      "description": "Challenge yourself with rock climbing."
+    },
+  ];
+
+  void _nextActivity() {
+    setState(() {
+      _currentActivityIndex = (_currentActivityIndex + 1) % activities.length;
+    });
   }
 
   @override
@@ -15,26 +56,82 @@ class HomeScreen extends StatelessWidget {
     final user = Provider.of<UserProvider>(context).user;
 
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
         children: [
-          Text(user.id),
-          Text(user.email),
-          Text(user.name),
-          ElevatedButton(
-            onPressed: () => signOutUser(context),
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-              textStyle: WidgetStateProperty.all(
-                const TextStyle(color: Colors.white),
+          // AppBar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 200,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/logo.png"),
+                  fit: BoxFit.cover,
+                ),
               ),
-              minimumSize: WidgetStateProperty.all(
-                Size(MediaQuery.of(context).size.width / 2.5, 50),
+              alignment: Alignment.center,
+              // child: const Text(
+              //   "BackOut",
+              //   style: TextStyle(
+              //     fontWeight: FontWeight.bold,
+              //     fontSize: 32,
+              //     color: Colors.white,
+              //   ),
+              // ),
+            ),
+          ),
+
+          // Swipeable Activity Card
+          Positioned.fill(
+            top: 150, // Keeps it below the app bar
+            child: GestureDetector(
+              onVerticalDragEnd: (details) {
+                if (details.primaryVelocity! < 0) {
+                  _nextActivity(); // Swipe up to change activity
+                }
+              },
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  },
+                  child: ActivityCard(
+                    key: ValueKey(activities[_currentActivityIndex]
+                        ["title"]), // Ensures smooth transition
+                    title: activities[_currentActivityIndex]["title"]!,
+                    date: activities[_currentActivityIndex]["date"]!,
+                    time: activities[_currentActivityIndex]["time"]!,
+                    location: activities[_currentActivityIndex]["location"]!,
+                    imageUrl: activities[_currentActivityIndex]["imageUrl"]!,
+                    description: activities[_currentActivityIndex]
+                        ["description"]!,
+                  ),
+                ),
               ),
             ),
-            child: const Text(
-              "Sign Out",
-              style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+
+          // Profile button
+          Positioned(
+            top: 40,
+            right: 20,
+            child: IconButton(
+              icon: const Icon(Icons.account_circle,
+                  size: 40, color: Colors.white),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ProfileScreen()),
+                );
+              },
             ),
           ),
         ],
