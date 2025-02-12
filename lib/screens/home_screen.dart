@@ -75,19 +75,23 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
+            
             UserAccountsDrawerHeader(
               accountName: Text(user.name),
               accountEmail: Text(user.email),
               // currentAccountPicture: CircleAvatar(
                 // backgroundImage: NetworkImage(user.profileImageUrl),
               // ),
+              decoration: BoxDecoration(
+                color: Colors.black,
+            ),
             ),
             ListTile(
               leading: Icon(Icons.logout),
               title: Text("Sign Out"),
               onTap: () async {
-              await AuthService().signOut();
-              Navigator.of(context).pop();
+              // await AuthService().signOut();
+              // Navigator.of(context).pop();
             },
             ),
           ],
