@@ -1,6 +1,6 @@
 const express = require("express");
 const Club = require("../models/club");
-const authMiddleware = require("../middleware/auth");
+const authMiddleware = require("../middleware/userAuth");
 const clubRouter = express.Router();
 
 // Create Club Route

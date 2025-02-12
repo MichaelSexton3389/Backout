@@ -1,6 +1,6 @@
 const express = require("express");
 const Activity = require("../models/activity");
-const authMiddleware = require("../middleware/auth"); // Middleware for authentication
+const authMiddleware = require("../middleware/userAuth"); // Middleware for authentication
 const activityRouter = express.Router();
 
 // Create Activity Route

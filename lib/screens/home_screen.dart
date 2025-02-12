@@ -56,85 +56,69 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = Provider.of<UserProvider>(context).user;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // AppBar
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 200,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/logo.png"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              alignment: Alignment.center,
-              // child: const Text(
-              //   "BackOut",
-              //   style: TextStyle(
-              //     fontWeight: FontWeight.bold,
-              //     fontSize: 32,
-              //     color: Colors.white,
-              //   ),
-              // ),
-            ),
-          ),
-
-          // Swipeable Activity Card
-          Positioned.fill(
-            top: 150, // Keeps it below the app bar
-            child: GestureDetector(
-              onVerticalDragEnd: (details) {
-                if (details.primaryVelocity! < 0) {
-                  _nextActivity(); // Swipe up to change activity
-                }
-              },
-              child: Center(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 500),
-                  transitionBuilder:
-                      (Widget child, Animation<double> animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    );
-                  },
-                  child: ActivityCard(
-                    key: ValueKey(activities[_currentActivityIndex]
-                        ["title"]), // Ensures smooth transition
-                    title: activities[_currentActivityIndex]["title"]!,
-                    date: activities[_currentActivityIndex]["date"]!,
-                    time: activities[_currentActivityIndex]["time"]!,
-                    location: activities[_currentActivityIndex]["location"]!,
-                    imageUrl: activities[_currentActivityIndex]["imageUrl"]!,
-                    description: activities[_currentActivityIndex]
-                        ["description"]!,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Profile button
-          Positioned(
-            top: 40,
-            right: 20,
-            child: IconButton(
-              icon: const Icon(Icons.account_circle,
-                  size: 40, color: Colors.white),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ProfileScreen()),
-                );
-              },
-            ),
+      appBar: AppBar(
+        title: const Text("BackOut"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle, size: 30),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ProfileScreen()),
+              );
+            },
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: Text(user.name),
+              accountEmail: Text(user.email),
+              // currentAccountPicture: CircleAvatar(
+                // backgroundImage: NetworkImage(user.profileImageUrl),
+              // ),
+            ),
+            ListTile(
+              leading: Icon(Icons.logout),
+              title: Text("Sign Out"),
+              onTap: () async {
+              await AuthService().signOut();
+              Navigator.of(context).pop();
+            },
+            ),
+          ],
+        ),
+      ),
+      body: Center(
+        child: GestureDetector(
+          onVerticalDragEnd: (details) {
+            if (details.primaryVelocity! < 0) {
+              _nextActivity(); // Swipe up to change activity
+            }
+          },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            child: ActivityCard(
+              key: ValueKey(activities[_currentActivityIndex]["title"]),
+              title: activities[_currentActivityIndex]["title"]!,
+              date: activities[_currentActivityIndex]["date"]!,
+              time: activities[_currentActivityIndex]["time"]!,
+              location: activities[_currentActivityIndex]["location"]!,
+              imageUrl: activities[_currentActivityIndex]["imageUrl"]!,
+              description: activities[_currentActivityIndex]["description"]!,
+            ),
+          ),
+        ),
       ),
     );
   }

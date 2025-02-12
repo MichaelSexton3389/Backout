@@ -1,7 +1,7 @@
 const express = require("express");
 const Membership = require("../models/membership");
 const Club = require("../models/club");
-const authMiddleware = require("../middleware/auth");
+const authMiddleware = require("../middleware/userAuth");
 const membershipRouter = express.Router();
 
 // Follow (Join a Club)

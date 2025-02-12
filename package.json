@@ -22,6 +22,8 @@
   },
   "homepage": "https://github.com/MichaelSexton3389/Backout#readme",
   "dependencies": {
-    "cors": "^2.8.5"
-  }
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {}
 }

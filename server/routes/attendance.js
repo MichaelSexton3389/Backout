@@ -1,7 +1,7 @@
 const express = require("express");
 const Attendance = require("../models/attendance");
 const Activity = require("../models/activity");
-const authMiddleware = require("../middleware/auth");
+const authMiddleware = require("../middleware/userAuth");
 const attendanceRouter = express.Router();
 
 // Mark Attendance Route
