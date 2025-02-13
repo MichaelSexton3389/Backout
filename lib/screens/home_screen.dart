@@ -4,6 +4,7 @@ import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 import 'package:BackOut/screens/ProfileScreen.dart';
 import 'package:BackOut/widgets/activity_card.dart';
+import 'package:BackOut/screens/inbox_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -59,6 +60,17 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text("BackOut"),
         actions: [
+        IconButton(
+          icon: const Icon(Icons.chat_bubble_outline, size: 30),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InboxScreen(currentUser: user.name),
+              ),
+            );
+          },
+        ),
           IconButton(
             icon: const Icon(Icons.account_circle, size: 30),
             onPressed: () {
