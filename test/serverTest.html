@@ -1,0 +1,94 @@
+# 1. Sign in to get a JWT token
+POST http://localhost:3000/api/signin
+Content-Type: application/json
+
+{
+"email": "aryan@colorado.edu",
+"password": "Nhibataunga25#"
+}
+
+###
+
+# 2. Create a new activity (replace YOUR_JWT_TOKEN with the actual token from step 1)
+POST http://localhost:3000/api/activities
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+Content-Type: application/json
+
+{
+"title": "Woohoo Trip",
+"description": "Woohooo",
+"location": "Rocky Mountain Park",
+"date": "2025-03-15T10:00:00.000Z"
+}
+
+###
+GET http://localhost:3000/api/user/activities
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzOTQxNn0.Htff16v6VtiLiLzz1-OBJR8WO6ntXgcGP8VqBZoyyy0
+###
+DELETE http://localhost:3000/api/activities/67a9192eaa9df5a5c6998a50
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+
+### 
+
+DELETE http://localhost:3000/api/activities/67a90bb79b602eda49de5915
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+
+###
+DELETE http://localhost:3000/api/activities/67a9163de5c392ef2e297d4c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+
+###
+DELETE http://localhost:3000/api/activities/67a9179b83810e1cf4ff7dfb
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+
+###
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+67a294df86e65bfed00aa6c9
+###
+
+POST http://localhost:3000/api/attendance
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+Content-Type: application/json
+
+{
+"activity_id": "67a91df62dc2f91b7dc4cd96", 
+"status": true, 
+"points_earned": 5
+}
+###
+get http://localhost:3000/api/attendance/67a91df62dc2f91b7dc4cd96
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+###
+
+POST http://localhost:3000/api/clubs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+Content-Type: application/json
+
+{
+"name": "Neards Outdoors",
+"description": "A club for neards to get outside."
+}
+
+###
+
+get http://localhost:3000/api/clubs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTE0MDgxNH0.KVYmXHgHnrLZgbuDqnsWGMopQuu13QP7VLZfN_yq8Es
+
+###
+
+put http://localhost:3000/api/clubs/67a929866ad4f5b3d08f95b5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+Content-Type: application/json
+
+{
+"description": "A club for neards to get outside, but anyone can join"
+}
+
+###
+post http://localhost:3000/api/clubs/67a929866ad4f5b3d08f95b5/follow
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTE0MDgxNH0.KVYmXHgHnrLZgbuDqnsWGMopQuu13QP7VLZfN_yq8Es
+###
+DELETE http://localhost:3000/api/clubs/67a929866ad4f5b3d08f95b5/unfollow
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTE0MDgxNH0.KVYmXHgHnrLZgbuDqnsWGMopQuu13QP7VLZfN_yq8Es
+###
