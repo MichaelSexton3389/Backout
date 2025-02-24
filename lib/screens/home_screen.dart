@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Center(
         child: GestureDetector(
           onVerticalDragEnd: (details) {
-            if (details.primaryVelocity! < 0) {
+            if (details.primaryVelocity! < 2) {
               _nextActivity(); // Swipe up to change activity
             }
           },
