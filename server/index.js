@@ -29,7 +29,7 @@ app.use(activityRouter)
 app.use(attendanceRouter);
 app.use(clubRouter);
 app.use(membershipRouter);
-app.use(userRouter);
+app.use('/api/user', userRouter);
 app.use(messageRouter);
 
 setupMessageSocket(io);
