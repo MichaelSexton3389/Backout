@@ -24,7 +24,7 @@ class _InboxScreenState extends State<InboxScreen> {
 
   Future<void> fetchUsers() async {
     try {
-      final response = await http.get(Uri.parse('http://localhost:3000/users'));
+      final response = await http.get(Uri.parse('http://localhost:3000/api/user/users'));
       if (response.statusCode == 200) {
         List<dynamic> usersJson = json.decode(response.body);
         setState(() {

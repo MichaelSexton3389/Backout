@@ -92,7 +92,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmO
 DELETE http://localhost:3000/api/clubs/67a929866ad4f5b3d08f95b5/unfollow
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTE0MDgxNH0.KVYmXHgHnrLZgbuDqnsWGMopQuu13QP7VLZfN_yq8Es
 ###
-#Sending profile photo update with jsw token (should work
+#Sending profile photo update with jsw token (should work)
 PUT http://localhost:3000/api/user/update-photo
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
 Content-Type: application/json
