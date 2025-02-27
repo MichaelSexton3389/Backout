@@ -73,4 +73,16 @@ authRouter.post("/api/signin", async (req,res) => {
 })
 
 
+// signout route
+
+authRouter.post("/api/signout", async (req, res) => {
+    try {
+        res.status(200).json({ message: "Sign out successful" });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+
+
 module.exports = authRouter;

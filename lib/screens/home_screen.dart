@@ -102,8 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: Icon(Icons.logout),
               title: Text("Sign Out"),
               onTap: () async {
-              // await AuthService().signOut();
-              // Navigator.of(context).pop();
+                AuthService().signOut(context: context);
             },
             ),
           ],
