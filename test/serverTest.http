@@ -115,3 +115,13 @@ Content-Type: application/json
 # 1. Fetch all users (should return list of users)
 GET http://localhost:3000/api/user/users
 Content-Type: application/json
+
+###
+PUT http://localhost:3000/api/user/update-bio
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+Content-Type: application/json
+
+{
+  "userId": "67a294df86e65bfed00aa6c9",
+  "bio": "YO! WHO'S READY TO GET BACK OUTSIDE!!!!"
+}
