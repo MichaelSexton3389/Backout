@@ -29,7 +29,7 @@ class _InboxScreenState extends State<InboxScreen> {
         List<dynamic> usersJson = json.decode(response.body);
         setState(() {
           users = usersJson
-              .map((user) => {'name': user['name'], 'id': user['_id']})
+              .map((user) => {'name': user['name'], 'id': user['_id'], 'profile_picture': user['profile_picture']})
               .toList();
           _isLoading = false;
         });
@@ -55,8 +55,15 @@ class _InboxScreenState extends State<InboxScreen> {
               itemBuilder: (context, index) {
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Colors.blueGrey,
-                    child: Text(users[index]['name']![0].toUpperCase()), // User's initial
+                    backgroundColor: Colors.black,
+                    backgroundImage: users[index]['profile_picture'] != null && users[index]['profile_picture'].isNotEmpty
+                        ? NetworkImage(users[index]['profile_picture'])
+                        : null, // Use network image if available
+                    child: users[index]['profile_picture'] == null || users[index]['profile_picture'].isEmpty
+                        ? Text(
+                            users[index]['name'][0].toUpperCase(),
+                            style: TextStyle(color: Colors.white)) // Show initial if no image
+                        : null,
                   ),
                   title: Text(users[index]['name']!),
                   onTap: () {

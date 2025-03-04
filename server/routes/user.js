@@ -38,7 +38,7 @@ userRouter.put('/update-photo', authMiddleware, async (req, res) => {
     }
 });
 
-// ✅ NEW: Update Bio
+// Update Bio
 userRouter.put('/update-bio', authMiddleware, async (req, res) => {
     try {
         const { userId, bio } = req.body;
@@ -62,5 +62,33 @@ userRouter.put('/update-bio', authMiddleware, async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
+
+// Follow a user (Add Pal)
+userRouter.post("/addPal", authMiddleware, async (req, res) => {
+  const { userId, targetUserId } = req.body;
+
+  try {
+    // Add target user to the current user's pal list (if not already added)
+    await User.findByIdAndUpdate(userId, { $addToSet: { pals: targetUserId } });
+
+    // Add current user to the target user's pal list (ensure mutual connection)
+    await User.findByIdAndUpdate(targetUserId, { $addToSet: { pals: userId } });
+
+    res.json({ success: true, message: "Pals added successfully!" });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+userRouter.get("/user/:userId/pal-count", async (req, res) => {
+    try {
+      const user = await User.findById(req.params.userId);
+      res.json({ palCount: user.pals.length });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+
 
 module.exports = userRouter;

@@ -75,10 +75,14 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.account_circle, size: 30),
             onPressed: () {
               Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>  ProfileScreen()),
-              );
+    context,
+    MaterialPageRoute(
+      builder: (context) => ProfileScreen(
+        currentUser: user, // The logged-in user
+        profileUser: user, // Their own profile ID
+      ),
+    ),
+  );
             },
           ),
         ],

@@ -28,6 +28,47 @@ activityRouter.post("/api/activities", authMiddleware, async (req, res) => {
     }
 });
 
+// Join Activity and Check for Pals
+activityRouter.post("/join-activity", authMiddleware, async (req, res) => {
+    const { userId, activityId } = req.body;
+  
+    try {
+        // Add activity to user's list if not already there
+        await User.findByIdAndUpdate(userId, { $addToSet: { activities: activityId } });
+
+        // Find all users who have attended this activity
+        const participants = await User.find({ activities: activityId });
+
+        for (let participant of participants) {
+            if (participant._id.toString() !== userId) {
+                // Check if they are already pals
+                const isAlreadyPals = await User.findOne({
+                    _id: userId,
+                    pals: participant._id,
+                });
+
+                if (!isAlreadyPals) { // Only add them as pals if they aren't already pals
+                    // Count how many activities they have in common
+                    const commonActivities = await User.findOne({
+                        _id: userId,
+                        activities: { $in: participant.activities },
+                    });
+
+                    if (commonActivities.activities.length >= 3) {
+                        // Ensure a mutual pal connection
+                        await User.findByIdAndUpdate(userId, { $addToSet: { pals: participant._id } });
+                        await User.findByIdAndUpdate(participant._id, { $addToSet: { pals: userId } });
+                    }
+                }
+            }
+        }
+
+        res.json({ success: true, message: "Joined activity and checked for mutual pals!" });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // Get Activity Route
 activityRouter.get("/api/activities/:id", authMiddleware, async (req, res) => {
     try {
