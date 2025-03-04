@@ -4,6 +4,7 @@ import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 import 'package:BackOut/screens/ProfileScreen.dart';
 import 'package:BackOut/widgets/activity_card.dart';
+import 'package:BackOut/screens/inbox_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentActivityIndex = 0;
+  int _selectedTabIndex = 0; // 0 for Pals, 1 for Discover
 
   final List<Map<String, String>> activities = [
     {
@@ -45,20 +47,73 @@ class _HomeScreenState extends State<HomeScreen> {
     },
   ];
 
+  final List<Map<String, String>> discoverActivities = [
+    {
+      "title": "Mountain Biking",
+      "date": "Friday, Nov 10",
+      "time": "9 AM",
+      "location": "Valmont Bike Park",
+      "imageUrl":
+          "https://live.staticflickr.com/3749/9586943958_ecb99d7162_c.jpg",
+      "description": "Explore mountain biking trails for all skill levels!"
+    },
+    {
+      "title": "Photography Hike",
+      "date": "Saturday, Nov 11",
+      "time": "7 AM",
+      "location": "NCAR Trail",
+      "imageUrl":
+          "https://live.staticflickr.com/7322/16398331988_4a3c47c652_c.jpg",
+      "description": "Capture the beautiful sunrise over Boulder."
+    },
+    {
+      "title": "Kayaking Adventure",
+      "date": "Sunday, Nov 12",
+      "time": "11 AM",
+      "location": "Boulder Reservoir",
+      "imageUrl":
+          "https://live.staticflickr.com/4099/4923499275_91f50798c7_c.jpg",
+      "description": "Paddle through the reservoir's calm waters."
+    },
+  ];
+
   void _nextActivity() {
     setState(() {
-      _currentActivityIndex = (_currentActivityIndex + 1) % activities.length;
+      if (_selectedTabIndex == 0) {
+        _currentActivityIndex = (_currentActivityIndex + 1) % activities.length;
+      } else {
+        _currentActivityIndex = (_currentActivityIndex + 1) % discoverActivities.length;
+      }
+    });
+  }
+
+  void _switchTab(int index) {
+    setState(() {
+      _selectedTabIndex = index;
+      _currentActivityIndex = 0; // Reset to first activity when switching tabs
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
+    final currentActivities = _selectedTabIndex == 0 ? activities : discoverActivities;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("BackOut"),
         actions: [
+        IconButton(
+          icon: const Icon(Icons.chat_bubble_outline, size: 30),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InboxScreen(currentUser: user.name),
+              ),
+            );
+          },
+        ),
           IconButton(
             icon: const Icon(Icons.account_circle, size: 30),
             onPressed: () {
@@ -75,54 +130,118 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            
             UserAccountsDrawerHeader(
               accountName: Text(user.name),
               accountEmail: Text(user.email),
-              // currentAccountPicture: CircleAvatar(
-                // backgroundImage: NetworkImage(user.profileImageUrl),
-              // ),
               decoration: BoxDecoration(
                 color: Colors.black,
-            ),
+              ),
             ),
             ListTile(
               leading: Icon(Icons.logout),
               title: Text("Sign Out"),
               onTap: () async {
-              // await AuthService().signOut();
-              // Navigator.of(context).pop();
-            },
+                AuthService().signOut(context: context);
+              },
             ),
           ],
         ),
       ),
-      body: Center(
-        child: GestureDetector(
-          onVerticalDragEnd: (details) {
-            if (details.primaryVelocity! < 0) {
-              _nextActivity(); // Swipe up to change activity
-            }
-          },
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            transitionBuilder: (Widget child, Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-            child: ActivityCard(
-              key: ValueKey(activities[_currentActivityIndex]["title"]),
-              title: activities[_currentActivityIndex]["title"]!,
-              date: activities[_currentActivityIndex]["date"]!,
-              time: activities[_currentActivityIndex]["time"]!,
-              location: activities[_currentActivityIndex]["location"]!,
-              imageUrl: activities[_currentActivityIndex]["imageUrl"]!,
-              description: activities[_currentActivityIndex]["description"]!,
+      body: Column(
+        children: [
+          // Tab Selector
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 1,
+                  blurRadius: 3,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _switchTab(0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Pals",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: _selectedTabIndex == 0 ? Colors.blue : Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          height: 3,
+                          color: _selectedTabIndex == 0 ? Colors.blue : Colors.transparent,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _switchTab(1),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Discover",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: _selectedTabIndex == 1 ? Colors.blue : Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          height: 3,
+                          color: _selectedTabIndex == 1 ? Colors.blue : Colors.transparent,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
+          
+          // Activity Card
+          Expanded(
+            child: GestureDetector(
+              onVerticalDragEnd: (details) {
+                if (details.primaryVelocity! < 0) {
+                  _nextActivity(); // Swipe up to change activity
+                }
+              },
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  );
+                },
+                child: ActivityCard(
+                  key: ValueKey(currentActivities[_currentActivityIndex]["title"]),
+                  title: currentActivities[_currentActivityIndex]["title"]!,
+                  date: currentActivities[_currentActivityIndex]["date"]!,
+                  time: currentActivities[_currentActivityIndex]["time"]!,
+                  location: currentActivities[_currentActivityIndex]["location"]!,
+                  imageUrl: currentActivities[_currentActivityIndex]["imageUrl"]!,
+                  description: currentActivities[_currentActivityIndex]["description"]!,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
