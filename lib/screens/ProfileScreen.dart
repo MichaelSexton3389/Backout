@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:BackOut/providers/user_providers.dart';
 import 'package:BackOut/models/user.dart';
 import 'package:BackOut/widgets/post_widget.dart';
+import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -19,12 +20,10 @@ class ProfileScreen extends StatefulWidget {
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
-  
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  
-bool isEditing = false;
+  bool isEditing = false;
 // Aspect ratio options
   final Map<String, double> aspectRatios = {
     "Square (1:1)": 1.0,
@@ -32,10 +31,10 @@ bool isEditing = false;
     "16:9": 16 / 9,
     "3:4": 3 / 4,
   };
-  Color bg_color= Colors.black;
+  Color bg_color = Colors.black;
   Color nameColor = Colors.white; // Default name color
   Color counter_font = Colors.white;
-  Color bioColor = Colors.white;
+  Color bioColor = Colors.white.withOpacity(0.85);
   // ignore: deprecated_member_use
   Color counter_bg = Colors.black.withOpacity(0.5);
   Color follow_font = Colors.black;
@@ -53,7 +52,6 @@ bool isEditing = false;
         .get(Uri.parse("https://your-api.com/api/user/$userId/pal-count"));
 
     if (response.statusCode == 200) {
-      
       setState(() {
         palCount = json.decode(response.body)['palCount'];
       });
@@ -61,16 +59,17 @@ bool isEditing = false;
   }
 
   void changeAspectRatio(int index, Map<String, dynamic> selectedOption) {
-  setState(() {
-    userPosts[index]['aspectRatio'] = selectedOption['aspectRatio'];
-    userPosts[index]['widthSpan'] = selectedOption['widthSpan'];
-    userPosts[index]['heightSpan'] = selectedOption['heightSpan'];
-  });
-}
+    setState(() {
+      userPosts[index]['aspectRatio'] = selectedOption['aspectRatio'];
+      userPosts[index]['widthSpan'] = selectedOption['widthSpan'];
+      userPosts[index]['heightSpan'] = selectedOption['heightSpan'];
+    });
+  }
 
   void addPal() async {
     final userId = widget.currentUser.id;
-    final targetUserId = widget.profileUser.id; // Replace with actual target user ID
+    final targetUserId =
+        widget.profileUser.id; // Replace with actual target user ID
 
     final response = await http.post(
       Uri.parse("https://your-api.com/api/follow"),
@@ -83,114 +82,129 @@ bool isEditing = false;
     }
   }
 
-  void fetchUserPosts() async {
-  final userId = Provider.of<UserProvider>(context, listen: false).user.id;
-  final response = await http.get(Uri.parse("https://your-api.com/api/user/$userId/posts"));
+  Future<void> _extractDominantColor() async {
+    if (widget.profileUser.profilePicture != null &&
+        widget.profileUser.profilePicture!.isNotEmpty) {
+      final PaletteGenerator paletteGenerator =
+          await PaletteGenerator.fromImageProvider(
+        NetworkImage(widget.profileUser.profilePicture!),
+      );
 
-  if (response.statusCode == 200) {
-    setState(() {
-      userPosts = List<Map<String, dynamic>>.from(json.decode(response.body)).map((post) {
-        return {
-          ...post,
-          "aspectRatio": (post["aspectRatio"] is double) 
-              ? post["aspectRatio"] 
-              : (post["aspectRatio"] is int) 
-                ? (post["aspectRatio"] as int).toDouble() 
-                : 1.0, // ✅ Ensures aspectRatio is always a double
-        };
-      }).toList();
-    });
-  } else {
-    print("Error Fetching Posts: ${response.statusCode}");
-
-    // Fallback dummy posts
-
-setState(() {
-  userPosts = [
-    {
-      "aspectRatio": 2.5, // Super Wide
-      "widthSpan": 3,
-      "heightSpan": 2,
-      "postImage": "https://images.pexels.com/photos/4719837/pexels-photo-4719837.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "caption": "Best coach one could ask for!",
-      "musicUrl": null
-    },
-    {
-      "aspectRatio": 1.0, // Square
-      "widthSpan": 1,
-      "heightSpan": 1,
-      "postImage": "https://images.pexels.com/photos/30911610/pexels-photo-30911610/free-photo-of-sunny-lakeside-promenade-with-lush-trees.jpeg",
-      "caption": "Morning runs. I tell you man.",
-      "musicUrl": null
-    },
-    {
-      "aspectRatio": 0.6, // Tall
-      "widthSpan": 1,
-      "heightSpan": 2,
-      "postImage": "https://images.pexels.com/photos/1366919/pexels-photo-1366919.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "caption": "Tall vibes.",
-      "musicUrl": null
-    },
-    {
-      "aspectRatio": 1.8, // Wide
-      "widthSpan": 2,
-      "heightSpan": 1,
-      "postImage": "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "caption": "Sunset scenes.",
-      "musicUrl": null
-    },
-    {
-      "aspectRatio": 0.75, // Tallish
-      "widthSpan": 1,
-      "heightSpan": 2,
-      "postImage": "https://images.pexels.com/photos/30975669/pexels-photo-30975669/free-photo-of-horseback-riders-in-rural-ulupamir-turkiye.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "caption": "Towering trees.",
-      "musicUrl": null
-    },
-    {
-      "aspectRatio": 1.4, // Square
-      "widthSpan": 2,
-      "heightSpan": 2,
-      "postImage": "https://images.pexels.com/photos/1194235/pexels-photo-1194235.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "caption": "Mountain goals.",
-      "musicUrl": null
-    },
-    {
-      "aspectRatio": 1.4, // Semi-Wide
-      "widthSpan": 2,
-      "heightSpan": 2,
-      "postImage": "https://images.pexels.com/photos/29267513/pexels-photo-29267513/free-photo-of-young-tourist-taking-photo-on-busy-city-street.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-      "caption": "City lights.",
-      "musicUrl": null
-    },
-    // {
-    //   "aspectRatio": 0.5, // Extra Tall
-    //   "widthSpan": 1,
-    //   "heightSpan": 3,
-    //   "postImage": "https://images.pexels.com/photos/159711/lighthouse-sea-horizon-ocean-159711.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    //   "caption": "Lighthouse lookout.",
-    //   "musicUrl": null
-    // },
-  ];
-});
+      setState(() {
+        bg_color = paletteGenerator.dominantColor?.color ?? Colors.black;
+      });
+    }
   }
-}
+
+  void fetchUserPosts() async {
+    final userId = Provider.of<UserProvider>(context, listen: false).user.id;
+    final response = await http
+        .get(Uri.parse("https://your-api.com/api/user/$userId/posts"));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        userPosts = List<Map<String, dynamic>>.from(json.decode(response.body))
+            .map((post) {
+          return {
+            ...post,
+            "aspectRatio": (post["aspectRatio"] is double)
+                ? post["aspectRatio"]
+                : (post["aspectRatio"] is int)
+                    ? (post["aspectRatio"] as int).toDouble()
+                    : 1.0, // ✅ Ensures aspectRatio is always a double
+          };
+        }).toList();
+      });
+    } else {
+      print("Error Fetching Posts: ${response.statusCode}");
+
+      // Fallback dummy posts
+
+      setState(() {
+        userPosts = [
+          {
+            "aspectRatio": 2.5, // Super Wide
+            "widthSpan": 3,
+            "heightSpan": 2,
+            "postImage":
+                "https://images.pexels.com/photos/4719837/pexels-photo-4719837.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "caption": "Best coach one could ask for!",
+            "musicUrl": null
+          },
+          {
+            "aspectRatio": 1.0, // Square
+            "widthSpan": 1,
+            "heightSpan": 1,
+            "postImage":
+                "https://images.pexels.com/photos/30911610/pexels-photo-30911610/free-photo-of-sunny-lakeside-promenade-with-lush-trees.jpeg",
+            "caption": "Morning runs. I tell you man.",
+            "musicUrl": null
+          },
+          {
+            "aspectRatio": 0.6, // Tall
+            "widthSpan": 1,
+            "heightSpan": 2,
+            "postImage":
+                "https://images.pexels.com/photos/1366919/pexels-photo-1366919.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "caption": "Tall vibes.",
+            "musicUrl": null
+          },
+          {
+            "aspectRatio": 1.8, // Wide
+            "widthSpan": 2,
+            "heightSpan": 1,
+            "postImage":
+                "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "caption": "Sunset scenes.",
+            "musicUrl": null
+          },
+          {
+            "aspectRatio": 0.75, // Tallish
+            "widthSpan": 1,
+            "heightSpan": 2,
+            "postImage":
+                "https://images.pexels.com/photos/30975669/pexels-photo-30975669/free-photo-of-horseback-riders-in-rural-ulupamir-turkiye.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "caption": "Towering trees.",
+            "musicUrl": null
+          },
+          {
+            "aspectRatio": 1.4, // Square
+            "widthSpan": 2,
+            "heightSpan": 2,
+            "postImage":
+                "https://images.pexels.com/photos/1194235/pexels-photo-1194235.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "caption": "Mountain goals.",
+            "musicUrl": null
+          },
+          {
+            "aspectRatio": 1.4, // Semi-Wide
+            "widthSpan": 2,
+            "heightSpan": 2,
+            "postImage":
+                "https://images.pexels.com/photos/29267513/pexels-photo-29267513/free-photo-of-young-tourist-taking-photo-on-busy-city-street.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "caption": "City lights.",
+            "musicUrl": null
+          },
+        ];
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     fetchPalCount();
     fetchUserPosts();
+    _extractDominantColor();
   }
 
   @override
   Widget build(BuildContext context) {
-    User loggedInUser= widget.currentUser;
-    User profileUser= widget.profileUser;
+    User loggedInUser = widget.currentUser;
+    User profileUser = widget.profileUser;
 
     final user = profileUser;
 
-    
     // ✅ Handle null safety for profilePicture
     String profileImage =
         (user.profilePicture != null && user.profilePicture!.isNotEmpty)
@@ -200,7 +214,26 @@ setState(() {
     return Scaffold(
       extendBodyBehindAppBar: true, // ✅ Allows image to extend to the top
       backgroundColor: bg_color, // ✅ Ensures a clean fullscreen look
-      body: SingleChildScrollView(
+      body: Stack(
+      children: [
+        // ✅ Gradient Background Using Profile Picture's Dominant Color
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  bg_color,  // Profile Picture's Dominant Color
+                  bg_color.withOpacity(0.6), // Fading Effect
+                  Colors.black, // Darker color towards posts for contrast
+                ],
+                stops: [0.2, 0.6, 1.0],
+              ),
+            ),
+          ),
+        ),
+        SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(bottom: 40),
           child: Column(
@@ -237,6 +270,27 @@ setState(() {
                             )
                           : null,
                     ),
+                    // ✅ Gradient Overlay at Bottom (Smooths the Transition)
+    Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 150, // Adjust for smoother fade
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,  // Smooth fade effect
+              bg_color.withOpacity(0.6),
+              bg_color,
+            ],
+            stops: [0.0, 0.7, 1.0],
+          ),
+        ),
+      ),
+    ),
                     // ✅ Back Button (Transparent Circle with Arrow)
                     Positioned(
                       top: 70, // Adjust for safe area padding
@@ -279,8 +333,32 @@ setState(() {
                               color: nameColor,
                             ),
                           ),
-
-                          const SizedBox(height: 10), // Spacing
+                          // ✅ Bio Section
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                top: 8.0,
+                                left: 20,
+                                right: 20), // ✅ Adds spacing
+                            child: Text(
+                              user.safeBio,
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize:
+                                    16, // ✅ Slightly smaller font for readability
+                                fontFamily: selectedFont,
+                                color: bioColor,
+                                fontStyle: FontStyle
+                                    .italic, // ✅ Makes it feel more natural
+                              ),
+                            ),
+                          ),
+                          Divider(
+                            color:
+                                Colors.white, // ✅ Faded white for a clean look
+                            thickness: 1,
+                            indent: 20,
+                            endIndent: 20,
+                          ),
 
                           // ✅ Pal Count & Activity Count (Now below the name)
                           Container(
@@ -348,13 +426,17 @@ setState(() {
                           backgroundColor: MaterialStateProperty.all(
                               Colors.blue.withOpacity(0.8)),
                         ),
-                        onPressed: (user.id == loggedInUser.id) ? (){
-                          setState(() {
-                            isEditing = !isEditing;
-                          });
-                        } : addPal,
+                        onPressed: (user.id == loggedInUser.id)
+                            ? () {
+                                setState(() {
+                                  isEditing = !isEditing;
+                                });
+                              }
+                            : addPal,
                         child: Text(
-                          user.id == loggedInUser.id ? (isEditing ? "Save" : "Edit") : "Add Pal",
+                          user.id == loggedInUser.id
+                              ? (isEditing ? "Save" : "Edit")
+                              : "Add Pal",
                           style: TextStyle(
                               fontFamily: selectedFont, color: Colors.white),
                         ),
@@ -372,76 +454,97 @@ setState(() {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 15),
-
-                    // ✅ Bio Section
-                    Text(
-                      user.safeBio,
-                      textAlign: TextAlign.left,
-                      style: TextStyle(fontSize: 16, fontFamily: selectedFont, color: bioColor),
-                    ),
                     userPosts.isEmpty
-  ? Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.camera_alt, size: 50, color: Colors.grey),
-          SizedBox(height: 10),
-          Text("No Posts Yet", style: TextStyle(fontSize: 18, color: Colors.grey)),
-        ],
-      ),
-    )
-: StaggeredGrid.count(
-    crossAxisCount: 3, // 3 columns
-    mainAxisSpacing: 8,
-    crossAxisSpacing: 8,
-    children: userPosts.asMap().entries.map((entry) {
-      final index = entry.key;
-      final post = entry.value;
-      return StaggeredGridTile.count(
-        crossAxisCellCount: post['widthSpan'],
-        mainAxisCellCount: post['heightSpan'],
-        child: Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                post["postImage"],
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
-            ),
-            if (isEditing)
-  Positioned(
-    top: 8,
-    right: 8,
-    child: PopupMenuButton<Map<String, dynamic>>(
-      icon: Icon(Icons.crop, color: Colors.white, size: 20),
-      color: Colors.black.withOpacity(0.9),
-      onSelected: (selectedOption) {
-        changeAspectRatio(index, selectedOption);
-      },
-      itemBuilder: (context) => [
-        {"label": "Square (1:1)", "aspectRatio": 1.0, "widthSpan": 1, "heightSpan": 1},
-        {"label": "Wide (16:9)", "aspectRatio": 1.8, "widthSpan": 2, "heightSpan": 1},
-        {"label": "Tall (3:4)", "aspectRatio": 3 / 4, "widthSpan": 1, "heightSpan": 2},
-        {"label": "Super Wide (3x2)", "aspectRatio": 2.5, "widthSpan": 3, "heightSpan": 2},
-      ].map((option) {
-        return PopupMenuItem<Map<String, dynamic>>(
-          value: option,
-          child: Text(
-            option["label"] as String,
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      }).toList(),
-    ),
-  ),
-          ],
-        ),
-      );
-    }).toList(),
-  ),
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.camera_alt,
+                                    size: 50, color: Colors.grey),
+                                SizedBox(height: 10),
+                                Text("No Posts Yet",
+                                    style: TextStyle(
+                                        fontSize: 18, color: Colors.grey)),
+                              ],
+                            ),
+                          )
+                        : StaggeredGrid.count(
+                            crossAxisCount: 3, // 3 columns
+                            mainAxisSpacing: 8,
+                            crossAxisSpacing: 8,
+                            children: userPosts.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final post = entry.value;
+                              return StaggeredGridTile.count(
+                                crossAxisCellCount: post['widthSpan'],
+                                mainAxisCellCount: post['heightSpan'],
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.network(
+                                        post["postImage"],
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                      ),
+                                    ),
+                                    if (isEditing)
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: PopupMenuButton<
+                                            Map<String, dynamic>>(
+                                          icon: Icon(Icons.crop,
+                                              color: Colors.white, size: 20),
+                                          color: Colors.black.withOpacity(0.9),
+                                          onSelected: (selectedOption) {
+                                            changeAspectRatio(
+                                                index, selectedOption);
+                                          },
+                                          itemBuilder: (context) => [
+                                            {
+                                              "label": "Square (1:1)",
+                                              "aspectRatio": 1.0,
+                                              "widthSpan": 1,
+                                              "heightSpan": 1
+                                            },
+                                            {
+                                              "label": "Wide (16:9)",
+                                              "aspectRatio": 1.8,
+                                              "widthSpan": 2,
+                                              "heightSpan": 1
+                                            },
+                                            {
+                                              "label": "Tall (3:4)",
+                                              "aspectRatio": 3 / 4,
+                                              "widthSpan": 1,
+                                              "heightSpan": 2
+                                            },
+                                            {
+                                              "label": "Super Wide (3x2)",
+                                              "aspectRatio": 2.5,
+                                              "widthSpan": 3,
+                                              "heightSpan": 2
+                                            },
+                                          ].map((option) {
+                                            return PopupMenuItem<
+                                                Map<String, dynamic>>(
+                                              value: option,
+                                              child: Text(
+                                                option["label"] as String,
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          ),
                   ],
                 ),
               ),
@@ -449,6 +552,8 @@ setState(() {
           ),
         ),
       ),
-    );
+      ],
+    ));
+    
   }
 }
