@@ -1,17 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:BackOut/services/socket_service.dart';
-import 'package:intl/intl.dart'; // For formatting timestamps
+import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:BackOut/services/socket_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:BackOut/services/gcs_services.dart';
 import 'dart:convert';
 
 class ChatScreen extends StatefulWidget {
-    final String currentUser; 
-    final String receiverUser;
-    ChatScreen({required this.currentUser, required this.receiverUser});
-    
-    @override
-    _ChatScreenState createState() => _ChatScreenState();
+  final String currentUser;
+  final String receiverUser;
+
+  ChatScreen({required this.currentUser, required this.receiverUser});
+
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
@@ -21,31 +24,8 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isTyping = false;
   bool _canSendMessage = false;
   bool _isLoading = true;
-    Future<void> fetchMessages() async {
-        try {
-            final response = await http.get(Uri.parse(
-                'http://localhost:3000/messages/${widget.currentUser}/${widget.receiverUser}'));
+  File? _selectedImage; // Store picked image
 
-            if (response.statusCode == 200) {
-            List<dynamic> messagesJson = json.decode(response.body);
-            setState(() {
-                messages = messagesJson.map((msg) => {
-                    'sender': msg['sender'].toString(),
-                    'message': msg['message'].toString(),
-                    'timestamp': msg['timestamp'].toString(),
-                    }).toList();
-                _isLoading = false;
-            });
-            } else {
-            throw Exception("Failed to load messages");
-            }
-        } catch (e) {
-            print("Error fetching messages: $e");
-            setState(() {
-            _isLoading = false;
-            });
-        }
-    }
   @override
   void initState() {
     super.initState();
@@ -54,29 +34,22 @@ class _ChatScreenState extends State<ChatScreen> {
       _socketService.connect();
     }
 
-    // Fetch existing messages (simulating a delay for loading)
-    Future.delayed(Duration(seconds: 1), () {
-      setState(() {
-        _isLoading = false;
-      });
-    });
-
-
-
     _socketService.socket.on('receiveMessage', (data) {
       if (mounted) {
-    bool isDuplicate = messages.any((msg) => msg['message'] == data['message'] && msg['sender'] == data['sender']);
-    if (!isDuplicate) { // ✅ Prevent duplicate messages
-      setState(() {
-        messages.add({
-          'sender': data['sender'],
-          'message': data['message'],
-          'timestamp': DateTime.now().toIso8601String(),
-        });
-      });
-    }
-  }
-});
+        bool isDuplicate = messages.any((msg) => 
+          msg['message'] == data['message'] && msg['sender'] == data['sender']);
+        if (!isDuplicate) {
+          setState(() {
+            messages.add({
+              'sender': data['sender'],
+              'message': data['message'] ?? "",
+              'imageUrl': data['imageUrl'] ?? "",
+              'timestamp': DateTime.now().toIso8601String(),
+            });
+          });
+        }
+      }
+    });
 
     _socketService.socket.on('typing', (_) {
       if (mounted) setState(() => _isTyping = true);
@@ -87,24 +60,77 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void sendMessage() {
-    if (_messageController.text.isNotEmpty) {
-      _socketService.sendMessage(widget.currentUser, widget.receiverUser, _messageController.text);
+  Future<void> fetchMessages() async {
+    try {
+      final response = await http.get(Uri.parse(
+          'http://localhost:3000/messages/${widget.currentUser}/${widget.receiverUser}'));
+
+      if (response.statusCode == 200) {
+        List<dynamic> messagesJson = json.decode(response.body);
+        setState(() {
+          messages = messagesJson.map((msg) => {
+            'sender': msg['sender'].toString(),
+            'message': msg['message'].toString(),
+            'imageUrl': msg['imageUrl']?.toString() ?? "",
+            'timestamp': msg['timestamp'].toString(),
+          }).toList();
+          _isLoading = false;
+        });
+      } else {
+        throw Exception("Failed to load messages");
+      }
+    } catch (e) {
+      print("Error fetching messages: $e");
       setState(() {
-        // messages.add({
-        //   'sender': widget.currentUser,
-        //   'message': _messageController.text,
-        //   'timestamp': DateTime.now().toIso8601String(),
-        // });
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> pickAndUploadImage() async {
+  final picker = ImagePicker();
+  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+  if (pickedFile != null) {
+    File selectedImage = File(pickedFile.path);
+
+    // Upload to Google Cloud Storage
+    String? imageUrl = await GCSService.uploadImageToGCS(selectedImage);
+    if (imageUrl != null) {
+      sendMessage(imageUrl: imageUrl); // Send the image as a message
+    } else {
+      print("Image upload failed");
+    }
+  }
+}
+
+
+  void sendMessage({String? imageUrl}) {
+    String textMessage = _messageController.text.trim();
+
+    if (textMessage.isNotEmpty || imageUrl != null) {
+      _socketService.sendMessage(
+        widget.currentUser,
+        widget.receiverUser,
+        textMessage
+      );
+
+      setState(() {
+        messages.add({
+          'sender': widget.currentUser,
+          'message': textMessage,
+          'imageUrl': imageUrl ?? "",
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+        _messageController.clear();
+        _selectedImage = null;
         _canSendMessage = false;
       });
-      _messageController.clear();
     }
   }
 
   @override
   void dispose() {
-    print("🚀 ChatScreen dispose() called!");
     _socketService.socket.off('receiveMessage');
     _messageController.dispose();
     super.dispose();
@@ -118,16 +144,18 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: _isLoading
-                ? Center(child: CircularProgressIndicator()) // Show loading indicator
+                ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       bool isMe = messages[index]['sender'] == widget.currentUser;
+                      bool hasImage = messages[index]['imageUrl'] != "";
+
                       return Row(
                         mainAxisAlignment:
                             isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
                         children: [
-                          if (!isMe) // Show initials for received messages
+                          if (!isMe)
                             CircleAvatar(
                               backgroundColor: Colors.blueGrey,
                               child: Text(
@@ -135,7 +163,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
-                          SizedBox(width: isMe ? 0 : 6), // Spacing for received messages
+                          SizedBox(width: isMe ? 0 : 6),
                           Container(
                             margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                             padding: EdgeInsets.all(12),
@@ -151,17 +179,28 @@ class _ChatScreenState extends State<ChatScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  messages[index]['message']!,
-                                  style: TextStyle(
-                                    color: isMe ? Colors.white : Colors.black,
+                                if (hasImage)
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 8),
+                                    child: Image.network(
+                                      messages[index]['imageUrl']!,
+                                      width: 200,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
-                                ),
+                                if (messages[index]['message']!.isNotEmpty)
+                                  Text(
+                                    messages[index]['message']!,
+                                    style: TextStyle(
+                                      color: isMe ? Colors.white : Colors.black,
+                                    ),
+                                  ),
                                 SizedBox(height: 4),
                                 Text(
                                   DateFormat('h:mm a').format(
                                     DateTime.parse(messages[index]['timestamp']!),
-                                  ), // Format time to "10:30 AM"
+                                  ),
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: isMe ? Colors.white70 : Colors.black54,
@@ -175,7 +214,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
           ),
-          if (_isTyping) // Show "User is typing..." indicator
+          if (_isTyping)
             Padding(
               padding: EdgeInsets.only(left: 16, bottom: 4),
               child: Align(
@@ -195,6 +234,10 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: EdgeInsets.all(8.0),
       child: Row(
         children: [
+          IconButton(
+            icon: Icon(Icons.image, color: Colors.blueAccent),
+            onPressed: pickAndUploadImage, // 📸 Pick and upload an image
+          ),
           Expanded(
             child: TextField(
               controller: _messageController,
@@ -215,12 +258,11 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
           ),
-          
           SizedBox(width: 8),
           IconButton(
             icon: Icon(Icons.send,
                 color: _canSendMessage ? Colors.blueAccent : Colors.grey),
-            onPressed: _canSendMessage ? sendMessage : null,
+            onPressed: _canSendMessage ? () => sendMessage() : null,
           ),
         ],
       ),

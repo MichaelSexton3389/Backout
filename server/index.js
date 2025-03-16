@@ -34,7 +34,7 @@ app.use(messageRouter);
 
 setupMessageSocket(io);
 
-const DB = "mongodb+srv://{USERNAME}:{PASSWORD}@cluster1.d6p3k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
+const DB = "mongodb+srv://mise3389:pSBZAUklT0E6pP9K@cluster1.d6p3k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
 
 mongoose
     .connect(DB)

@@ -22,31 +22,38 @@ messageRouter.get("/messages/:sender/:receiver", async (req, res) => {
 
 // ✅ WebSocket message handling function
 function setupMessageSocket(io) {
-    io.on("connection", (socket) => {
-        console.log("User connected:", socket.id);
-
-        socket.on("sendMessage", async (data) => {
-            console.log("Message received:", data);
-
+    io.on('connection', (socket) => {
+        console.log('User connected');
+    
+        socket.on('sendMessage', async (data) => {
             try {
-                // ✅ Save message to MongoDB
+                const { sender, receiver, message, imageUrl } = data;
+    
                 const newMessage = new Message({
-                    sender: data.sender,
-                    receiver: data.receiver,
-                    message: data.message
+                    sender,
+                    receiver,
+                    message,
+                    imageUrl, // Store the image URL
                 });
+    
                 await newMessage.save();
-
-                io.emit("receiveMessage", data); // ✅ Broadcast message to all users
-            } catch (err) {
-                console.error("Error saving message:", err);
+    
+                io.to(receiver).emit('receiveMessage', {
+                    sender,
+                    receiver,
+                    message,
+                    imageUrl,
+                    timestamp: new Date().toISOString(),
+                });
+            } catch (error) {
+                console.error('Error saving message:', error);
             }
         });
-
-        socket.on("disconnect", () => {
-            console.log("User disconnected:", socket.id);
+    
+        socket.on('disconnect', () => {
+            console.log('User disconnected');
         });
-    });
+    });    
 }
 
 module.exports = { messageRouter, setupMessageSocket };
