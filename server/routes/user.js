@@ -90,6 +90,15 @@ userRouter.get("/user/:userId/pal-count", async (req, res) => {
     }
   });
 
+  userRouter.get("/user/:userId/activity-count", async (req, res) => {
+    try {
+      const user = await User.findById(req.params.userId);
+      res.json({ activityCount: user.activities.length });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 
 
 module.exports = userRouter;

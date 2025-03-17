@@ -47,6 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<Map<String, dynamic>> userPosts = []; // Define userPosts
 
   int palCount = 0;
+  int activityCount = 0;
 
 void showEditProfilePicModal() {
 
@@ -106,11 +107,22 @@ void updateProfilePicture(String newImageUrl) async {
   void fetchPalCount() async {
     final userId = widget.profileUser.id;
     final response = await http
-        .get(Uri.parse("https://your-api.com/api/user/$userId/pal-count"));
+        .get(Uri.parse("http://localhost:3000/api/user/$userId/pal-count"));
 
     if (response.statusCode == 200) {
       setState(() {
         palCount = json.decode(response.body)['palCount'];
+      });
+    }
+  }
+
+  void fetchActivityCount() async {
+    final userId = widget.profileUser.id;
+    final response = await http.get(Uri.parse("http://localhost:3000/api/user/$userId/activity-count"));
+
+    if (response.statusCode == 200) {
+      setState(() {
+        activityCount = json.decode(response.body)['activityCount'];
       });
     }
   }
@@ -251,9 +263,10 @@ void updateProfilePicture(String newImageUrl) async {
   void initState() {
     super.initState();
     fetchPalCount();
+    fetchActivityCount(); // Fetch the activity count
     fetchUserPosts();
     _extractDominantColor();
-     bioController.text = widget.profileUser.safeBio; // Prefill bio
+    bioController.text = widget.profileUser.safeBio; // Prefill bio
   }
 
   // Function to update bio in the database
@@ -517,7 +530,7 @@ void updateProfilePicture(String newImageUrl) async {
                                                   fontSize: 20,
                                                   fontWeight: FontWeight.bold,
                                                   color: counter_font)),
-                                          Text("Pals",
+                                          Text("Buddies",
                                               style: TextStyle(
                                                   fontSize: 10,
                                                   color: counter_font)),
@@ -538,7 +551,7 @@ void updateProfilePicture(String newImageUrl) async {
                                               5), // Space between the line and next text
                                       Column(
                                         children: [
-                                          Text("12",
+                                          Text("$activityCount",
                                               style: TextStyle(
                                                   fontSize: 20,
                                                   fontWeight: FontWeight.bold,
