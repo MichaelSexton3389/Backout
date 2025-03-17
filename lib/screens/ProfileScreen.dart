@@ -24,6 +24,8 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool isEditing = false;
+  bool isEditingBio = false;
+  TextEditingController bioController = TextEditingController();
 // Aspect ratio options
   final Map<String, double> aspectRatios = {
     "Square (1:1)": 1.0,
@@ -196,6 +198,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     fetchPalCount();
     fetchUserPosts();
     _extractDominantColor();
+     bioController.text = widget.profileUser.safeBio; // Prefill bio
+  }
+
+  // Function to update bio in the database
+  void updateBio() async {
+    final userId = widget.profileUser.id;
+    final response = await http.put(
+      Uri.parse("http://localhost:3000/api/user/update-bio"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "userId": userId,
+        "bio": bioController.text.trim(),
+      }),
+    );
+
+        if (response.statusCode == 200) {
+      setState(() {
+        widget.profileUser.safeBio = bioController.text.trim(); // Update locally
+        isEditingBio = false; // Exit edit mode
+      });
+    } else {
+      print("Failed to update bio");
+    }
   }
 
   @override
@@ -212,348 +237,400 @@ class _ProfileScreenState extends State<ProfileScreen> {
             : ""; // Default empty string (shows initials)
 
     return Scaffold(
-      extendBodyBehindAppBar: true, // ✅ Allows image to extend to the top
-      backgroundColor: bg_color, // ✅ Ensures a clean fullscreen look
-      body: Stack(
-      children: [
-        // ✅ Gradient Background Using Profile Picture's Dominant Color
-        Positioned.fill(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  bg_color,  // Profile Picture's Dominant Color
-                  bg_color.withOpacity(0.6), // Fading Effect
-                  Colors.black, // Darker color towards posts for contrast
-                ],
-                stops: [0.2, 0.6, 1.0],
+        extendBodyBehindAppBar: true, // ✅ Allows image to extend to the top
+        backgroundColor: bg_color, // ✅ Ensures a clean fullscreen look
+        body: Stack(
+          children: [
+            // ✅ Gradient Background Using Profile Picture's Dominant Color
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      bg_color, // Profile Picture's Dominant Color
+                      bg_color.withOpacity(0.6), // Fading Effect
+                      Colors.black, // Darker color towards posts for contrast
+                    ],
+                    stops: [0.2, 0.6, 1.0],
+                  ),
+                ),
               ),
             ),
-          ),
-        ),
-        SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 40),
-          child: Column(
-            children: [
-              // ✅ Profile Picture (Full-Screen Image)
-              Container(
-                height: MediaQuery.of(context).size.height * 0.75,
-                width: double.infinity,
-                child: Stack(
-                  alignment: Alignment.center,
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 40),
+                child: Column(
                   children: [
-                    // Profile Image
+                    // ✅ Profile Picture (Full-Screen Image)
                     Container(
+                      height: MediaQuery.of(context).size.height * 0.75,
                       width: double.infinity,
-                      decoration: BoxDecoration(
-                        image: profileImage.isNotEmpty
-                            ? DecorationImage(
-                                image: NetworkImage(profileImage),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                        color: Colors.grey[800], // Fallback color
-                      ),
-                      child: profileImage.isEmpty
-                          ? Center(
-                              child: Text(
-                                user.name.substring(0, 2).toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 50,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            )
-                          : null,
-                    ),
-                    // ✅ Gradient Overlay at Bottom (Smooths the Transition)
-    Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 150, // Adjust for smoother fade
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.transparent,  // Smooth fade effect
-              bg_color.withOpacity(0.6),
-              bg_color,
-            ],
-            stops: [0.0, 0.7, 1.0],
-          ),
-        ),
-      ),
-    ),
-                    // ✅ Back Button (Transparent Circle with Arrow)
-                    Positioned(
-                      top: 70, // Adjust for safe area padding
-                      left: 30, // Position on the left
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(
-                              context); // ✅ Takes user back to Home Screen
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black.withOpacity(
-                                0.4), // ✅ Transparent black background
-                          ),
-                          child: Center(
-                            child: Icon(Icons.arrow_back,
-                                color: Colors.white), // ✅ White arrow
-                          ),
-                        ),
-                      ),
-                    ),
-                    // ✅ Name (Positioned in lower 3/4 of image)
-                    // ✅ Name & Pal Count Positioned in lower-left of image
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          // Name
-                          Text(
-                            user.name,
-                            style: TextStyle(
-                              fontSize: 70,
-                              fontFamily: selectedFont,
-                              // fontWeight: nameWeight,
-                              color: nameColor,
+                          // Profile Image
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              image: profileImage.isNotEmpty
+                                  ? DecorationImage(
+                                      image: NetworkImage(profileImage),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                              color: Colors.grey[800], // Fallback color
                             ),
+                            child: profileImage.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      user.name.substring(0, 2).toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 50,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : null,
                           ),
-                          // ✅ Bio Section
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                top: 8.0,
-                                left: 20,
-                                right: 20), // ✅ Adds spacing
-                            child: Text(
-                              user.safeBio,
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                fontSize:
-                                    16, // ✅ Slightly smaller font for readability
-                                fontFamily: selectedFont,
-                                color: bioColor,
-                                fontStyle: FontStyle
-                                    .italic, // ✅ Makes it feel more natural
+                          // ✅ Gradient Overlay at Bottom (Smooths the Transition)
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 150, // Adjust for smoother fade
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent, // Smooth fade effect
+                                    bg_color.withOpacity(0.6),
+                                    bg_color,
+                                  ],
+                                  stops: [0.0, 0.7, 1.0],
+                                ),
                               ),
                             ),
                           ),
-                          Divider(
-                            color:
-                                Colors.white, // ✅ Faded white for a clean look
-                            thickness: 1,
-                            indent: 20,
-                            endIndent: 20,
-                          ),
-
-                          // ✅ Pal Count & Activity Count (Now below the name)
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 4),
-                            decoration: BoxDecoration(
-                              color:
-                                  counter_bg, // Slight background for readability
-                              borderRadius: BorderRadius.circular(10),
+                          // ✅ Back Button (Transparent Circle with Arrow)
+                          Positioned(
+                            top: 70, // Adjust for safe area padding
+                            left: 30, // Position on the left
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pop(
+                                    context); // ✅ Takes user back to Home Screen
+                              },
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.black.withOpacity(
+                                      0.4), // ✅ Transparent black background
+                                ),
+                                child: Center(
+                                  child: Icon(Icons.arrow_back,
+                                      color: Colors.white), // ✅ White arrow
+                                ),
+                              ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                          ),
+                          // ✅ Name (Positioned in lower 3/4 of image)
+                          // ✅ Name & Pal Count Positioned in lower-left of image
+                          Positioned(
+                            bottom: 20,
+                            left: 20,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("$palCount",
+                                // Name
+                                Text(
+                                  user.name,
+                                  style: TextStyle(
+                                    fontSize: 70,
+                                    fontFamily: selectedFont,
+                                    // fontWeight: nameWeight,
+                                    color: nameColor,
+                                  ),
+                                ),
+                                // ✅ Bio Section
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0, left: 20, right: 20),
+                            child: Stack(
+                              alignment: Alignment.centerRight,
+                              children: [
+                                isEditingBio
+                                    ? Container(
+                                        width: MediaQuery.of(context).size.width * 0.9, // ✅ Constrain width to 90% of screen
+                                        padding: EdgeInsets.symmetric(horizontal: 10), // ✅ Add some spacing
+                                        child: TextField(
+                                          controller: bioController,
+                                          maxLines: 2,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: selectedFont,
+                                            color: Colors.white,
+                                          ),
+                                          decoration: InputDecoration(
+                                            hintText: "Enter your new bio...",
+                                            hintStyle: TextStyle(color: Colors.white60),
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                              borderSide: BorderSide(color: Colors.white60),
+                                            ),
+                                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                          ),
+                                        ),
+                                      )
+                                    : Text(
+                                        user.safeBio,
+                                        textAlign: TextAlign.left,
                                         style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: counter_font)),
-                                    Text("Pals",
-                                        style: TextStyle(
-                                            fontSize: 10, color: counter_font)),
-                                  ],
+                                          fontSize: 16,
+                                          fontFamily: selectedFont,
+                                          color: bioColor,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                    
+                                      ),
+                                if (isEditing)
+                                  Positioned(
+                                    right: 5,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        if (isEditingBio) {
+                                          updateBio();
+                                        } else {
+                                          setState(() {
+                                            isEditingBio = true;
+                                            bioController.text = user.safeBio;
+                                          });
+                                        }
+                                      },
+                                      child: Icon(
+                                        isEditingBio ? Icons.check : Icons.edit,
+                                        color: Colors.white,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                                ),
+                                ),
+                                Divider(
+                                  color: Colors.white, // ✅ Faded white for a clean look
+                                  thickness: 1,
+                                  indent: 20,
+                                  endIndent: 20,
                                 ),
 
-                                SizedBox(
-                                    width:
-                                        10), // Space between the text and line
+                                // ✅ Pal Count & Activity Count (Now below the name)
                                 Container(
-                                  width: 1, // Thin White Line Separator
-                                  height: 30,
-                                  color: counter_font,
-                                ),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        counter_bg, // Slight background for readability
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text("$palCount",
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: counter_font)),
+                                          Text("Pals",
+                                              style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: counter_font)),
+                                        ],
+                                      ),
 
-                                SizedBox(
-                                    width:
-                                        5), // Space between the line and next text
-                                Column(
-                                  children: [
-                                    Text("12",
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            color: counter_font)),
-                                    Text("Activities",
-                                        style: TextStyle(
-                                            fontSize: 10, color: counter_font)),
-                                  ],
+                                      SizedBox(
+                                          width:
+                                              10), // Space between the text and line
+                                      Container(
+                                        width: 1, // Thin White Line Separator
+                                        height: 30,
+                                        color: counter_font,
+                                      ),
+
+                                      SizedBox(
+                                          width:
+                                              5), // Space between the line and next text
+                                      Column(
+                                        children: [
+                                          Text("12",
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: counter_font)),
+                                          Text("Activities",
+                                              style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: counter_font)),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
+                            ),
+                          ),
+
+                          // ✅ Pals Button (Now in the bottom-right)
+                          Positioned(
+                            bottom: 20,
+                            right: 20,
+                            child: ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                    Colors.blue.withOpacity(0.8)),
+                              ),
+                              onPressed: (user.id == loggedInUser.id)
+                                  ? () {
+                                      setState(() {
+                                        isEditing = !isEditing;
+                                      });
+                                    }
+                                  : addPal,
+                              child: Text(
+                                user.id == loggedInUser.id
+                                    ? (isEditing ? "Save" : "Edit")
+                                    : "Add Pal",
+                                style: TextStyle(
+                                    fontFamily: selectedFont,
+                                    color: Colors.white),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    // ✅ Pals Button (Now in the bottom-right)
-                    Positioned(
-                      bottom: 20,
-                      right: 20,
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                              Colors.blue.withOpacity(0.8)),
-                        ),
-                        onPressed: (user.id == loggedInUser.id)
-                            ? () {
-                                setState(() {
-                                  isEditing = !isEditing;
-                                });
-                              }
-                            : addPal,
-                        child: Text(
-                          user.id == loggedInUser.id
-                              ? (isEditing ? "Save" : "Edit")
-                              : "Add Pal",
-                          style: TextStyle(
-                              fontFamily: selectedFont, color: Colors.white),
-                        ),
+                    // ✅ Profile Actions
+                    // Takes 1/4 of the screen
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 15),
+                          userPosts.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.camera_alt,
+                                          size: 50, color: Colors.grey),
+                                      SizedBox(height: 10),
+                                      Text("No Posts Yet",
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.grey)),
+                                    ],
+                                  ),
+                                )
+                              : StaggeredGrid.count(
+                                  crossAxisCount: 3, // 3 columns
+                                  mainAxisSpacing: 8,
+                                  crossAxisSpacing: 8,
+                                  children:
+                                      userPosts.asMap().entries.map((entry) {
+                                    final index = entry.key;
+                                    final post = entry.value;
+                                    return StaggeredGridTile.count(
+                                      crossAxisCellCount: post['widthSpan'],
+                                      mainAxisCellCount: post['heightSpan'],
+                                      child: Stack(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            child: Image.network(
+                                              post["postImage"],
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              height: double.infinity,
+                                            ),
+                                          ),
+                                          if (isEditing)
+                                            Positioned(
+                                              top: 8,
+                                              right: 8,
+                                              child: PopupMenuButton<
+                                                  Map<String, dynamic>>(
+                                                icon: Icon(Icons.crop,
+                                                    color: Colors.white,
+                                                    size: 20),
+                                                color: Colors.black
+                                                    .withOpacity(0.9),
+                                                onSelected: (selectedOption) {
+                                                  changeAspectRatio(
+                                                      index, selectedOption);
+                                                },
+                                                itemBuilder: (context) => [
+                                                  {
+                                                    "label": "Square (1:1)",
+                                                    "aspectRatio": 1.0,
+                                                    "widthSpan": 1,
+                                                    "heightSpan": 1
+                                                  },
+                                                  {
+                                                    "label": "Wide (16:9)",
+                                                    "aspectRatio": 1.8,
+                                                    "widthSpan": 2,
+                                                    "heightSpan": 1
+                                                  },
+                                                  {
+                                                    "label": "Tall (3:4)",
+                                                    "aspectRatio": 3 / 4,
+                                                    "widthSpan": 1,
+                                                    "heightSpan": 2
+                                                  },
+                                                  {
+                                                    "label": "Super Wide (3x2)",
+                                                    "aspectRatio": 2.5,
+                                                    "widthSpan": 3,
+                                                    "heightSpan": 2
+                                                  },
+                                                ].map((option) {
+                                                  return PopupMenuItem<
+                                                      Map<String, dynamic>>(
+                                                    value: option,
+                                                    child: Text(
+                                                      option["label"] as String,
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // ✅ Profile Actions
-              // Takes 1/4 of the screen
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 15),
-                    userPosts.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.camera_alt,
-                                    size: 50, color: Colors.grey),
-                                SizedBox(height: 10),
-                                Text("No Posts Yet",
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.grey)),
-                              ],
-                            ),
-                          )
-                        : StaggeredGrid.count(
-                            crossAxisCount: 3, // 3 columns
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                            children: userPosts.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final post = entry.value;
-                              return StaggeredGridTile.count(
-                                crossAxisCellCount: post['widthSpan'],
-                                mainAxisCellCount: post['heightSpan'],
-                                child: Stack(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.network(
-                                        post["postImage"],
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                      ),
-                                    ),
-                                    if (isEditing)
-                                      Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: PopupMenuButton<
-                                            Map<String, dynamic>>(
-                                          icon: Icon(Icons.crop,
-                                              color: Colors.white, size: 20),
-                                          color: Colors.black.withOpacity(0.9),
-                                          onSelected: (selectedOption) {
-                                            changeAspectRatio(
-                                                index, selectedOption);
-                                          },
-                                          itemBuilder: (context) => [
-                                            {
-                                              "label": "Square (1:1)",
-                                              "aspectRatio": 1.0,
-                                              "widthSpan": 1,
-                                              "heightSpan": 1
-                                            },
-                                            {
-                                              "label": "Wide (16:9)",
-                                              "aspectRatio": 1.8,
-                                              "widthSpan": 2,
-                                              "heightSpan": 1
-                                            },
-                                            {
-                                              "label": "Tall (3:4)",
-                                              "aspectRatio": 3 / 4,
-                                              "widthSpan": 1,
-                                              "heightSpan": 2
-                                            },
-                                            {
-                                              "label": "Super Wide (3x2)",
-                                              "aspectRatio": 2.5,
-                                              "widthSpan": 3,
-                                              "heightSpan": 2
-                                            },
-                                          ].map((option) {
-                                            return PopupMenuItem<
-                                                Map<String, dynamic>>(
-                                              value: option,
-                                              child: Text(
-                                                option["label"] as String,
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              ),
-                                            );
-                                          }).toList(),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      ],
-    ));
-    
+            ),
+          ],
+        ));
   }
 }

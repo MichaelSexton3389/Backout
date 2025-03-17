@@ -5,9 +5,9 @@ class User {
   final String name;
   final String email;
   final String token;
-  final String password;
-  final String? profilePicture; // optional (nullable)
-  final String? bio;
+   String password;
+   String? profilePicture; // optional (nullable)
+   String? bio;
 
   User({
     required this.id,
@@ -20,7 +20,11 @@ class User {
   });
 
   // ✅ Bio Getter
+  // String get safeBio => bio ?? "Write a bio already!";
+  
+
   String get safeBio => bio ?? "Write a bio already!";
+  set safeBio(String value) => bio = value;
 
   Map<String, dynamic> toMap() {
     return {

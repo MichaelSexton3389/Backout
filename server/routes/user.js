@@ -14,7 +14,7 @@ userRouter.get("/users", async (req, res) => {
 });
 
 // ✅ Update Profile Picture
-userRouter.put('/update-photo', authMiddleware, async (req, res) => {
+userRouter.put('/update-photo', async (req, res) => {
     try {
         const { userId, photoUrl } = req.body;
 
@@ -39,8 +39,9 @@ userRouter.put('/update-photo', authMiddleware, async (req, res) => {
 });
 
 // Update Bio
-userRouter.put('/update-bio', authMiddleware, async (req, res) => {
+userRouter.put('/update-bio', async (req, res) => {
     try {
+        console.log("Request body:", req.body); //debugging
         const { userId, bio } = req.body;
 
         if (!userId || bio === undefined) {
