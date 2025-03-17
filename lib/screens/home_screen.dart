@@ -60,24 +60,39 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text("BackOut"),
         actions: [
-        IconButton(
-          icon: const Icon(Icons.chat_bubble_outline, size: 30),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => InboxScreen(currentUser: user.name),
-              ),
-            );
-          },
-        ),
           IconButton(
-            icon: const Icon(Icons.account_circle, size: 30),
+            icon: const Icon(Icons.chat_bubble_outline, size: 30),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const ProfileScreen()),
+                  builder: (context) => InboxScreen(currentUser: user.name),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: CircleAvatar(
+              radius: 15, // Adjust size as needed
+              backgroundImage:
+                  user.profilePicture != null && user.profilePicture!.isNotEmpty
+                      ? NetworkImage(user.profilePicture!)
+                      : null,
+              backgroundColor: Colors.grey.shade300, // Fallback color
+              child: user.profilePicture == null || user.profilePicture!.isEmpty
+                  ? const Icon(Icons.account_circle,
+                      size: 30, color: Colors.white)
+                  : null,
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileScreen(
+                    currentUser: user, // The logged-in user
+                    profileUser: user, // Their own profile ID
+                  ),
+                ),
               );
             },
           ),
@@ -87,21 +102,21 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            
             UserAccountsDrawerHeader(
               accountName: Text(user.name),
               accountEmail: Text(user.email),
               // currentAccountPicture: CircleAvatar(
-                // backgroundImage: NetworkImage(user.profileImageUrl),
+              // backgroundImage: NetworkImage(user.profileImageUrl),
               // ),
               decoration: BoxDecoration(
                 color: Colors.black,
-            ),
+              ),
             ),
             ListTile(
               leading: Icon(Icons.logout),
               title: Text("Sign Out"),
               onTap: () async {
+
                 AuthService().signOut(context: context);
             },
             ),

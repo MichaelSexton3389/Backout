@@ -5,26 +5,48 @@ class User {
   final String name;
   final String email;
   final String token;
-  final String password;
+   String password;
+   String? profilePicture; // optional (nullable)
+   String? bio;
 
-  User({required this.id, required this.name, required this.email, required this.token, required this.password});
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.token,
+    required this.password,
+    this.profilePicture, // ✅ No longer required
+    this.bio,
+  });
 
-  Map<String, dynamic> toMap(){
+  // ✅ Bio Getter
+  // String get safeBio => bio ?? "Write a bio already!";
+  
+
+  String get safeBio => bio ?? "Write a bio already!";
+  set safeBio(String value) => bio = value;
+
+  Map<String, dynamic> toMap() {
     return {
-      'name':name,
-      'email':email,
-      'token':token,
-      'password':password
+      '_id': id,
+      'name': name,
+      'email': email,
+      'token': token,
+      'password': password,
+      'profile_picture': profilePicture, // ✅ Match API field
+      'bio': safeBio,
     };
   }
 
-  factory User.fromMap(Map<String, dynamic> map){
+  factory User.fromMap(Map<String, dynamic> map) {
     return User(
       id: map['_id'] ?? '',
       name: map['name'] ?? '',
       email: map['email'] ?? '',
       token: map['token'] ?? '',
-      password: map['password'] ?? ''
+      password: map['password'] ?? '',
+      profilePicture: map['profile_picture'], // ✅ Handle profile_picture
+      bio: map['bio'],
     );
   }
 

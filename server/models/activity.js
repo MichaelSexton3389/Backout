@@ -23,6 +23,11 @@ const activitySchema = new Schema({
     ref: 'User', // References the User model
     default: null
   },
+  participants: {
+    type: Schema.Types.ObjectId,
+    ref: 'User', // References the User model
+    default: []
+  },
   created_at: {
     type: Date,
     default: Date.now
