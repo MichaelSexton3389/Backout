@@ -48,6 +48,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   int palCount = 0;
 
+void showEditProfilePicModal() {
+
+  print("Edit Profile Picture button clicked!"); // Debugging
+  TextEditingController profilePicController = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Edit Profile Picture"),
+        content: TextField(
+          controller: profilePicController,
+          decoration: InputDecoration(
+            hintText: "Enter image URL",
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              updateProfilePicture(profilePicController.text);
+              Navigator.pop(context);
+            },
+            child: Text("Save"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void updateProfilePicture(String newImageUrl) async {
+  final userId = widget.profileUser.id;
+  final response = await http.put(
+    Uri.parse("http://localhost:3000/api/user/update-photo"),
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "userId": userId,
+      "photoUrl": newImageUrl.trim(),
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    setState(() {
+      widget.profileUser.profilePicture = newImageUrl.trim();
+    });
+  } else {
+    print("Failed to update profile picture");
+  }
+}
   void fetchPalCount() async {
     final userId = widget.profileUser.id;
     final response = await http
@@ -322,24 +377,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             left: 30, // Position on the left
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.pop(
-                                    context); // ✅ Takes user back to Home Screen
+                                Navigator.pop(context); // ✅ Takes user back to Home Screen
                               },
                               child: Container(
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.black.withOpacity(
-                                      0.4), // ✅ Transparent black background
+                                  color: Colors.black.withOpacity(0.4), // ✅ Transparent black background
                                 ),
                                 child: Center(
-                                  child: Icon(Icons.arrow_back,
-                                      color: Colors.white), // ✅ White arrow
+                                  child: Icon(Icons.arrow_back, color: Colors.white), // ✅ White arrow
                                 ),
                               ),
                             ),
                           ),
+                          // ✅ Edit Profile Picture Icon (Visible only in edit mode)
+                          if (isEditing)
+                            Positioned(
+                              top: 100,
+                              right: 40,
+                              child: GestureDetector(
+                                onTap: showEditProfilePicModal,
+                                child: Container(
+                                  padding: EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.black.withOpacity(0.6),
+                                  ),
+                                  child: Icon(Icons.edit, color: Colors.white, size: 20),
+                                ),
+                              ),
+                            ),
                           // ✅ Name (Positioned in lower 3/4 of image)
                           // ✅ Name & Pal Count Positioned in lower-left of image
                           Positioned(
@@ -361,66 +430,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 // ✅ Bio Section
                                 Padding(
                                   padding: const EdgeInsets.only(top: 8.0, left: 20, right: 20),
-                            child: Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
-                                isEditingBio
-                                    ? Container(
-                                        width: MediaQuery.of(context).size.width * 0.9, // ✅ Constrain width to 90% of screen
-                                        padding: EdgeInsets.symmetric(horizontal: 10), // ✅ Add some spacing
-                                        child: TextField(
-                                          controller: bioController,
-                                          maxLines: 2,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontFamily: selectedFont,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxWidth: MediaQuery.of(context).size.width * 0.8,
+                                        ),
+                                        child: isEditingBio
+                                            ? TextField(
+                                                controller: bioController,
+                                                maxLines: 2,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontFamily: selectedFont,
+                                                  color: Colors.white,
+                                                ),
+                                                decoration: InputDecoration(
+                                                  hintText: "Enter your new bio...",
+                                                  hintStyle: TextStyle(color: Colors.white60),
+                                                  border: OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    borderSide: BorderSide(color: Colors.white60),
+                                                  ),
+                                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                                ),
+                                              )
+                                            : Text(
+                                                user.safeBio,
+                                                textAlign: TextAlign.left,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontFamily: selectedFont,
+                                                  color: bioColor,
+                                                  fontStyle: FontStyle.italic,
+                                                ),
+                                              ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      if (isEditing)
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (isEditingBio) {
+                                              updateBio();
+                                            } else {
+                                              setState(() {
+                                                isEditingBio = true;
+                                                bioController.text = user.safeBio;
+                                              });
+                                            }
+                                          },
+                                          child: Icon(
+                                            isEditingBio ? Icons.check : Icons.edit,
                                             color: Colors.white,
-                                          ),
-                                          decoration: InputDecoration(
-                                            hintText: "Enter your new bio...",
-                                            hintStyle: TextStyle(color: Colors.white60),
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(10),
-                                              borderSide: BorderSide(color: Colors.white60),
-                                            ),
-                                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                            size: 18,
                                           ),
                                         ),
-                                      )
-                                    : Text(
-                                        user.safeBio,
-                                        textAlign: TextAlign.left,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontFamily: selectedFont,
-                                          color: bioColor,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                    
-                                      ),
-                                if (isEditing)
-                                  Positioned(
-                                    right: 5,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        if (isEditingBio) {
-                                          updateBio();
-                                        } else {
-                                          setState(() {
-                                            isEditingBio = true;
-                                            bioController.text = user.safeBio;
-                                          });
-                                        }
-                                      },
-                                      child: Icon(
-                                        isEditingBio ? Icons.check : Icons.edit,
-                                        color: Colors.white,
-                                        size: 18,
-                                      ),
-                                    ),
+                                    ],
                                   ),
-                              ],
-                                ),
                                 ),
                                 Divider(
                                   color: Colors.white, // ✅ Faded white for a clean look
