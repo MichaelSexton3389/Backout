@@ -33,9 +33,21 @@ const userSchema = mongoose.Schema({
         default:'' //setup a default image?
     },
     bio: {
-    type: String,
-    default: ''
+        type: String,
+        default: ''
     },
+
+    pals: [{
+         type: mongoose.Schema.Types.ObjectId,
+          ref: "User"
+         }], // Two-way pal connections
+         
+    activities: [{
+         type: mongoose.Schema.Types.ObjectId,
+          ref: "Activity"
+         }], // Activity participation
+
+
     created_at: {
         type: Date,
         default: Date.now
