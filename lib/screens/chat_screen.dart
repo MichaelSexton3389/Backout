@@ -24,7 +24,7 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isTyping = false;
   bool _canSendMessage = false;
   bool _isLoading = true;
-  File? _selectedImage; // Store picked image
+  File? _selectedImage;
 
   @override
   void initState() {
@@ -36,8 +36,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _socketService.socket.on('receiveMessage', (data) {
       if (mounted) {
-        bool isDuplicate = messages.any((msg) => 
-          msg['message'] == data['message'] && msg['sender'] == data['sender']);
+        bool isDuplicate = messages.any((msg) =>
+            msg['message'] == data['message'] &&
+            msg['sender'] == data['sender']);
         if (!isDuplicate) {
           setState(() {
             messages.add({
@@ -60,20 +61,23 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  // Function to fetch messages
   Future<void> fetchMessages() async {
     try {
       final response = await http.get(Uri.parse(
-          'http://localhost:3000/messages/${widget.currentUser}/${widget.receiverUser}'));
+          'https://my-backend-service-952120514384.us-central1.run.app/messages/${widget.currentUser}/${widget.receiverUser}'));
 
       if (response.statusCode == 200) {
         List<dynamic> messagesJson = json.decode(response.body);
         setState(() {
-          messages = messagesJson.map((msg) => {
-            'sender': msg['sender'].toString(),
-            'message': msg['message'].toString(),
-            'imageUrl': msg['imageUrl']?.toString() ?? "",
-            'timestamp': msg['timestamp'].toString(),
-          }).toList();
+          messages = messagesJson
+              .map((msg) => {
+                    'sender': msg['sender'].toString(),
+                    'message': msg['message'].toString(),
+                    'imageUrl': msg['imageUrl']?.toString() ?? "",
+                    'timestamp': msg['timestamp'].toString(),
+                  })
+              .toList();
           _isLoading = false;
         });
       } else {
@@ -88,44 +92,77 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> pickAndUploadImage() async {
-  final picker = ImagePicker();
-  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-  if (pickedFile != null) {
-    File selectedImage = File(pickedFile.path);
-
-    // Upload to Google Cloud Storage
-    String? imageUrl = await GCSService.uploadImageToGCS(selectedImage);
-    if (imageUrl != null) {
-      sendMessage(imageUrl: imageUrl); // Send the image as a message
-    } else {
-      print("Image upload failed");
-    }
-  }
-}
-
-
-  void sendMessage({String? imageUrl}) {
-    String textMessage = _messageController.text.trim();
-
-    if (textMessage.isNotEmpty || imageUrl != null) {
-      _socketService.sendMessage(
-        widget.currentUser,
-        widget.receiverUser,
-        textMessage
-      );
+    if (pickedFile != null) {
+      File selectedImage = File(pickedFile.path);
 
       setState(() {
-        messages.add({
-          'sender': widget.currentUser,
-          'message': textMessage,
-          'imageUrl': imageUrl ?? "",
-          'timestamp': DateTime.now().toIso8601String(),
-        });
-        _messageController.clear();
-        _selectedImage = null;
-        _canSendMessage = false;
+        _selectedImage = selectedImage; // Show selected image in the UI
       });
+
+      try {
+        // Upload the image to Google Cloud Storage and get the image URL
+        String? imageUrl = await GCSService.uploadImageToGCS(selectedImage);
+
+        if (imageUrl != null) {
+          print("Image uploaded successfully: $imageUrl");
+          // Send the image message after image is uploaded
+          sendMessage(
+            widget.currentUser,
+            widget.receiverUser,
+            '', // Empty text, as this is just an image
+            imageUrl, // Pass the image URL here
+          );
+        } else {
+          print("Image upload failed");
+        }
+      } catch (e) {
+        print("Error uploading image: $e");
+      }
+    }
+  }
+
+  Future<void> sendMessage(
+      String sender, String receiver, String message, String? imageUrl) async {
+    String textMessage = message.trim();
+
+    if (textMessage.isNotEmpty || imageUrl != null) {
+      setState(() {
+        _isLoading =
+            true; // Show loading spinner while the message is being sent
+      });
+
+      try {
+        // Send the message along with the image URL (which is a String?)
+        await _socketService.sendMessage(
+          sender,
+          receiver,
+          textMessage,
+          imageUrl, // Pass the image URL here (String?)
+        );
+
+        setState(() {
+          // After sending, update the messages list and reset the UI
+          messages.add({
+            'sender': sender,
+            'message': textMessage,
+            'imageUrl':
+                imageUrl ?? '', // If imageUrl is null, send an empty string
+            'timestamp': DateTime.now().toIso8601String(),
+          });
+          _messageController.clear();
+          _selectedImage = null;
+          _isLoading = false;
+          _canSendMessage = false;
+        });
+      } catch (e) {
+        print("Error sending message: $e");
+        setState(() {
+          _isLoading = false; // Stop loading if there's an error
+        });
+      }
     }
   }
 
@@ -148,12 +185,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 : ListView.builder(
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
-                      bool isMe = messages[index]['sender'] == widget.currentUser;
+                      bool isMe =
+                          messages[index]['sender'] == widget.currentUser;
                       bool hasImage = messages[index]['imageUrl'] != "";
 
                       return Row(
-                        mainAxisAlignment:
-                            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                        mainAxisAlignment: isMe
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
                         children: [
                           if (!isMe)
                             CircleAvatar(
@@ -165,15 +204,19 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                           SizedBox(width: isMe ? 0 : 6),
                           Container(
-                            margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            margin: EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
                             padding: EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isMe ? Colors.blueAccent : Colors.grey[300],
+                              color:
+                                  isMe ? Colors.blueAccent : Colors.grey[300],
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(12),
                                 topRight: Radius.circular(12),
-                                bottomLeft: isMe ? Radius.circular(12) : Radius.zero,
-                                bottomRight: isMe ? Radius.zero : Radius.circular(12),
+                                bottomLeft:
+                                    isMe ? Radius.circular(12) : Radius.zero,
+                                bottomRight:
+                                    isMe ? Radius.zero : Radius.circular(12),
                               ),
                             ),
                             child: Column(
@@ -199,11 +242,13 @@ class _ChatScreenState extends State<ChatScreen> {
                                 SizedBox(height: 4),
                                 Text(
                                   DateFormat('h:mm a').format(
-                                    DateTime.parse(messages[index]['timestamp']!),
+                                    DateTime.parse(
+                                        messages[index]['timestamp']!),
                                   ),
                                   style: TextStyle(
                                     fontSize: 10,
-                                    color: isMe ? Colors.white70 : Colors.black54,
+                                    color:
+                                        isMe ? Colors.white70 : Colors.black54,
                                   ),
                                 ),
                               ],
@@ -236,34 +281,44 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           IconButton(
             icon: Icon(Icons.image, color: Colors.blueAccent),
-            onPressed: pickAndUploadImage, // 📸 Pick and upload an image
+            onPressed: pickAndUploadImage,
           ),
           Expanded(
             child: TextField(
               controller: _messageController,
-              onChanged: (text) {
+              decoration: InputDecoration(
+                hintText: "Type a message",
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onChanged: (value) {
                 setState(() {
-                  _canSendMessage = text.isNotEmpty;
+                  _canSendMessage =
+                      value.trim().isNotEmpty || _selectedImage != null;
                 });
               },
-              decoration: InputDecoration(
-                hintText: "Enter message...",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              ),
             ),
           ),
-          SizedBox(width: 8),
           IconButton(
             icon: Icon(Icons.send,
                 color: _canSendMessage ? Colors.blueAccent : Colors.grey),
-            onPressed: _canSendMessage ? () => sendMessage() : null,
-          ),
+            onPressed: _canSendMessage
+                ? () async {
+                    String textMessage = _messageController.text.trim();
+
+                    // If there's an image, upload it first and get the URL
+                    String? imageUrl;
+                    if (_selectedImage != null) {
+                      imageUrl =
+                          await GCSService.uploadImageToGCS(_selectedImage!);
+                    }
+
+                    // Send the message with the image URL or just the text message
+                    sendMessage(widget.currentUser, widget.receiverUser,
+                        textMessage, imageUrl);
+                  }
+                : null,
+          )
         ],
       ),
     );

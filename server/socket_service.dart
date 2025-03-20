@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'gcs_services.dart';
+import '../lib/services/gcs_services.dart';
 class SocketService {
   static final SocketService _instance = SocketService._internal();
   late IO.Socket socket;
@@ -16,7 +16,7 @@ class SocketService {
   void connect() {
     if (_isConnected) return;
 
-    socket = IO.io('https://my-backend-service-952120514384.us-central1.run.app', <String, dynamic>{
+    socket = IO.io('http://localhost:3000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });

@@ -1,3 +1,8 @@
+// BACKEND URL TO ACCESS DB, HOSTED REMOTELY SO YOU DO NOT NEED TO RUN LOCALLY:
+// https://my-backend-service-952120514384.us-central1.run.app
+
+
+
 const express = require("express");
 const mongoose = require("mongoose");
 const http= require("http");
@@ -12,7 +17,7 @@ const attendanceRouter = require("./routes/attendance");
 const userRouter= require("./routes/user");
 const { messageRouter, setupMessageSocket } = require("./routes/messages");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 const app = express();
 const server= http.createServer(app);
 const io= new Server(server, {
@@ -33,6 +38,11 @@ app.use('/api/user', userRouter);
 app.use(messageRouter);
 
 setupMessageSocket(io);
+
+app.get("/", (req, res) => {
+  res.send("Hello from the backend server!");
+});
+
 
 const DB = "mongodb+srv://mise3389:pSBZAUklT0E6pP9K@cluster1.d6p3k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
 

@@ -6,6 +6,7 @@ import 'package:BackOut/screens/signup_screen.dart';
 import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 
+
 void main() { 
   runApp(
     MultiProvider(

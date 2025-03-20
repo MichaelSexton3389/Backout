@@ -49,6 +49,31 @@ function setupMessageSocket(io) {
                 console.error('Error saving message:', error);
             }
         });
+
+        socket.on('sendImageMessage', async (data) => {
+            try {
+                const { sender, receiver, message, imageUrl } = data;
+    
+                const newMessage = new Message({
+                    sender,
+                    receiver,
+                    message,
+                    imageUrl, // Store the image URL
+                });
+    
+                await newMessage.save();
+    
+                io.to(receiver).emit('receiveMessage', {
+                    sender,
+                    receiver,
+                    message,
+                    imageUrl,
+                    timestamp: new Date().toISOString(),
+                });
+            } catch (error) {
+                console.error('Error saving message:', error);
+            }
+        });
     
         socket.on('disconnect', () => {
             console.log('User disconnected');
