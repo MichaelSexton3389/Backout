@@ -1,0 +1,163 @@
+# 1. Sign in to get a JWT token
+POST http://localhost:3000/api/signin
+Content-Type: application/json
+
+{
+"email": "aryan@colorado.edu",
+"password": "Nhibataunga25#"
+}
+###
+POST http://localhost:3000/api/signout
+
+###
+#2 sign in to Micheal
+POST http://localhost:3000/api/signin
+Content-Type: application/json
+
+{
+"email": "Joe@colorado.edu",
+"password": "123"
+}
+
+###
+
+# 2. Create a new activity (replace YOUR_JWT_TOKEN with the actual token from step 1)
+POST http://localhost:3000/api/activities
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0NDIzODExMn0.HYFn1QyzkICQXUYjkIvdVvNpS_dYvSiXYMa_wb8vTH4
+Content-Type: application/json
+
+{
+"title": "Woohoo Trip",
+"description": "Woohooo",
+"bg_img": "https://images.pexels.com/photos/2604622/pexels-photo-2604622.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+"location": "Rocky Mountain Park",
+"date": "2025-04-09T13:14:34.262964"
+}
+
+###
+GET http://localhost:3000/api/user/activities
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzOTQxNn0.Htff16v6VtiLiLzz1-OBJR8WO6ntXgcGP8VqBZoyyy0
+###
+DELETE http://localhost:3000/api/activities/67f6f642effb8604b7880071
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+
+### 
+
+DELETE http://localhost:3000/api/activities/67a90bb79b602eda49de5915
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+
+###
+DELETE http://localhost:3000/api/activities/67a9163de5c392ef2e297d4c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+
+###
+DELETE http://localhost:3000/api/activities/67a9179b83810e1cf4ff7dfb
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+
+###
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+67a294df86e65bfed00aa6c9
+###
+
+POST http://localhost:3000/api/attendance
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+Content-Type: application/json
+
+{
+"activity_id": "67a91df62dc2f91b7dc4cd96", 
+"status": true, 
+"points_earned": 5
+}
+###
+get http://localhost:3000/api/attendance/67a91df62dc2f91b7dc4cd96
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+###
+
+POST http://localhost:3000/api/clubs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0NDIzOTgxNX0.leCL8o349BJTwD3Knjt52vULAxUb6rSJlKV4h05PU5o
+Content-Type: application/json
+
+{
+"name": "Neards Outdoors",
+"description": "A club for neards to get outside."
+}
+
+###
+
+get http://localhost:3000/api/clubs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTE0MDgxNH0.KVYmXHgHnrLZgbuDqnsWGMopQuu13QP7VLZfN_yq8Es
+
+###
+
+put http://localhost:3000/api/clubs/67a929866ad4f5b3d08f95b5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTEzNjQyOH0.pIJH784raSwMhPuMpfHJC_wHGHJvpcgjtz-Net5HL0M
+Content-Type: application/json
+
+{
+"description": "A club for neards to get outside, but anyone can join"
+}
+
+###
+post http://localhost:3000/api/clubs/67a929866ad4f5b3d08f95b5/follow
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTE0MDgxNH0.KVYmXHgHnrLZgbuDqnsWGMopQuu13QP7VLZfN_yq8Es
+###
+DELETE http://localhost:3000/api/clubs/67a929866ad4f5b3d08f95b5/unfollow
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTczOTE0MDgxNH0.KVYmXHgHnrLZgbuDqnsWGMopQuu13QP7VLZfN_yq8Es
+###
+#Sending profile photo update with jsw token (should work)
+PUT http://localhost:3000/api/user/update-photo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+Content-Type: application/json
+
+{
+  "userId": "67a294df86e65bfed00aa6c9",
+  "photoUrl": "https://images.pexels.com/photos/4890259/pexels-photo-4890259.jpeg"
+}
+
+###
+#sending profile photo update without jsw token, (Should not work)
+PUT http://localhost:3000/api/user/update-photo
+Content-Type: application/json
+
+{
+  "userId": "67a294df86e65bfed00aa6c9",
+  "photoUrl": "https://example.com/new-profile-pic.jpg"
+}
+###
+# 1. Fetch all users (should return list of users)
+GET http://localhost:3000/api/user/users
+Content-Type: application/json
+
+###
+PUT http://localhost:3000/api/user/update-bio
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+Content-Type: application/json
+
+{
+  "userId": "67a294df86e65bfed00aa6c9",
+  "bio": "YO! WHO'S READY TO GET BACK OUTSIDE!!!!"
+}
+
+PUT http://localhost:3000/api/user/update-bio
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+Content-Type: application/json
+
+{
+  "userId": "67a294df86e65bfed00aa6c9",
+  "bio": "YO! WHO'S READY TO GET BACK OUTSIDE!!!!"
+}
+
+###
+
+###
+# Test addPal API endpoint: Establishes a mutual pal connection between two users.
+POST http://localhost:3000/api/user/addPal
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0NDIzOTk3N30.8E9AAQeqbFcSjk-Po5Wj6BcLhXogJSQ6JRmmTw00KkE
+Content-Type: application/json
+
+{
+  "userId": "67a294df86e65bfed00aa6c9",
+  "targetUserId": "67eed32c08eac4a2905358b8"
+}
+###
