@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:BackOut/screens/ProfileScreen.dart';
 import 'package:BackOut/widgets/activity_card.dart';
 import 'package:BackOut/screens/inbox_screen.dart';
+import 'package:BackOut/screens/calendar_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,6 +62,18 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text("BackOut"),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_today, size: 26),
+            tooltip: "Calendar",
+            onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CalendarScreen(),
+            ),
+          );
+        },
+          ),
           IconButton(
             icon: const Icon(Icons.chat_bubble_outline, size: 30),
             onPressed: () {
