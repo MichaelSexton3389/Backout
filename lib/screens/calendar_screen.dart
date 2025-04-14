@@ -10,7 +10,6 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
-
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
@@ -44,12 +43,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-// Save events to shared preferences
-void _saveEvents() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String eventsJson = jsonEncode(_events);  // Convert events map to JSON
-  await prefs.setString('events', eventsJson);  // Save JSON string
-}
+  // Save events to shared preferences
+  void _saveEvents() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String eventsJson = jsonEncode(_events);  // Convert events map to JSON
+    await prefs.setString('events', eventsJson);  // Save JSON string
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,97 +143,124 @@ void _saveEvents() async {
     );
   }
 
-void _addEvent(String name, String location, String start, String end, String description) async {
-  setState(() {
-    DateTime selectedDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
-    if (_events[selectedDate] == null) {
-      _events[selectedDate] = [];
-    }
-    _events[selectedDate]!.add({
-      "name": name,
-      "start": start,
-      "end": end,
-      "location": location,
-      "description": description,
+  void _addEvent(String name, String location, String start, String end, String description) async {
+    setState(() {
+      DateTime selectedDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+      if (_events[selectedDate] == null) {
+        _events[selectedDate] = [];
+      }
+      _events[selectedDate]!.add({
+        "name": name,
+        "start": start,
+        "end": end,
+        "location": location,
+        "description": description,
+      });
     });
-  });
 
-  // Save to shared preferences
-  _saveEvents();
-}
+    // Save to shared preferences
+    _saveEvents();
+  }
 
-void _deleteEvent(Map<String, String> event) async {
-  setState(() {
-    DateTime selectedDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
-    _events[selectedDate]?.remove(event);
-    if (_events[selectedDate]?.isEmpty == true) {
-      _events.remove(selectedDate);
-    }
-  });
+  void _deleteEvent(Map<String, String> event) async {
+    setState(() {
+      DateTime selectedDate = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+      _events[selectedDate]?.remove(event);
+      if (_events[selectedDate]?.isEmpty == true) {
+        _events.remove(selectedDate);
+      }
+    });
 
-  // Save updated events to shared preferences
-  _saveEvents();
-}
+    // Save updated events to shared preferences
+    _saveEvents();
+  }
 
-  // Show dialog for adding an event
   void _showAddEventDialog() {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController locationController = TextEditingController();
-    final TextEditingController startController = TextEditingController();
-    final TextEditingController endController = TextEditingController();
-    final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Add Event"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Event Name"),
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text("Add Event"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: "Event Name"),
+                ),
+                TextField(
+                  controller: locationController,
+                  decoration: const InputDecoration(labelText: "Location"),
+                ),
+                ListTile(
+                  title: Text(startTime != null
+                      ? 'Start Time: ${startTime!.format(context)}'
+                      : 'Select Start Time'),
+                  trailing: const Icon(Icons.access_time),
+                  onTap: () async {
+                    final pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (pickedTime != null) {
+                      setState(() => startTime = pickedTime);
+                    }
+                  },
+                ),
+                ListTile(
+                  title: Text(endTime != null
+                      ? 'End Time: ${endTime!.format(context)}'
+                      : 'Select End Time'),
+                  trailing: const Icon(Icons.access_time),
+                  onTap: () async {
+                    final pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                    );
+                    if (pickedTime != null) {
+                      setState(() => endTime = pickedTime);
+                    }
+                  },
+                ),
+                TextField(
+                  controller: descriptionController,
+                  decoration: const InputDecoration(labelText: "Description"),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  if (startTime != null && endTime != null) {
+                    _addEvent(
+                      nameController.text,
+                      locationController.text,
+                      startTime!.format(context),
+                      endTime!.format(context),
+                      descriptionController.text,
+                    );
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text("Add Event"),
               ),
-              TextField(
-                controller: locationController,
-                decoration: const InputDecoration(labelText: "Location"),
-              ),
-              TextField(
-                controller: startController,
-                decoration: const InputDecoration(labelText: "Start Time"),
-              ),
-              TextField(
-                controller: endController,
-                decoration: const InputDecoration(labelText: "End Time"),
-              ),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: "Description"),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("Cancel"),
               ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _addEvent(
-                  nameController.text,
-                  locationController.text,
-                  startController.text,
-                  endController.text,
-                  descriptionController.text,
-                );
-                Navigator.of(context).pop();
-              },
-              child: const Text("Add Event"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancel"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+          );
+        },
+      );
+    },
+  );
+}
 }
