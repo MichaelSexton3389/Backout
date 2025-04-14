@@ -10,6 +10,7 @@ import 'package:BackOut/screens/inbox_screen.dart';
 import 'package:BackOut/widgets/glassmorphic_container.dart';
 import 'package:BackOut/widgets/activity_pals_invite.dart';
 import 'package:BackOut/widgets/create_activty_form.dart';
+import 'package:BackOut/screens/buddy_req_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -159,28 +160,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            CreateActivityButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  barrierColor: Colors.black12,
-                  builder: (context) {
-                    return FractionallySizedBox(
-                      heightFactor: 0.85,
-                      child: ModalBackground(
-                        child: Material(
-                          type: MaterialType.transparency,
-                          child: CreateActivityFormUpdated(),
-                        ),
+            // const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CreateActivityButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      barrierColor: Colors.black12,
+                      builder: (context) {
+                        return FractionallySizedBox(
+                          heightFactor: 0.85,
+                          child: ModalBackground(
+                            child: Material(
+                              type: MaterialType.transparency,
+                              child: CreateActivityFormUpdated(),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(width: 20),
+                BuddyRequestButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BuddyRequestScreen(),
                       ),
                     );
                   },
-                );
-              },
+                ),
+              ],
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -215,6 +233,42 @@ class CreateActivityButton extends StatelessWidget {
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Colors.white, // Will be masked by shader
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BuddyRequestButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const BuddyRequestButton({Key? key, required this.onPressed})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: GlassmorphicContainer(
+        width: 150,
+        height: 150,
+        child: Center(
+          child: ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [
+                Color.fromARGB(255, 55, 189, 141),
+                Color.fromARGB(255, 17, 90, 74),
+              ],
+            ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+            child: const Text(
+              "Find Buddies",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ),

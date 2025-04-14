@@ -13,6 +13,17 @@ userRouter.get("/users", async (req, res) => {
     }
 });
 
+// In your user route file (e.g., routes/user.js)
+userRouter.get('/user/:id', async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id).select('-password'); // exclude sensitive fields
+      if (!user) return res.status(404).send({ message: 'User not found' });
+      res.json({ user });
+    } catch (err) {
+      res.status(500).send({ error: 'Internal Server Error' });
+    }
+  });
+
 // ✅ Update Profile Picture
 userRouter.put('/update-photo', async (req, res) => {
     try {

@@ -7,12 +7,12 @@ import 'package:provider/provider.dart';
 import 'package:BackOut/providers/user_providers.dart';
 
 class InvitePalsScreen extends StatelessWidget {
-   final String title;
+  final String title;
   final String location;
   final String description;
   final String bgImg;
   final String date;
-  
+
   const InvitePalsScreen({
     Key? key,
     required this.title,
@@ -84,6 +84,10 @@ class InvitePalsScreen extends StatelessWidget {
                     onInvite: () {
                       // TODO: handle invite logic here
                     },
+                    onTap: () {
+                      Navigator.pushNamed(context, '/profile', arguments: pal['id']);
+                    },
+                    buttonText: "Invite",
                   );
                 }).toList(),
               );
@@ -102,36 +106,36 @@ class InvitePalsScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
         onPressed: () async {
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final token = userProvider.user.token;
- 
-  final response = await http.post(
-    Uri.parse("http://localhost:3000/api/activities"),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    },
-    body: jsonEncode({
-      'title': title,
-      'location': location,
-      'description': description,
-      'bg_img': bgImg,
-      'date': date,
-      'participants':[],
-    }),
-  );
+          final userProvider = Provider.of<UserProvider>(context, listen: false);
+          final token = userProvider.user.token;
 
-  if (response.statusCode == 201) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Failed to create activity: ${response.body}")),
-    );
-  }
-},
+          final response = await http.post(
+            Uri.parse("http://localhost:3000/api/activities"),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'title': title,
+              'location': location,
+              'description': description,
+              'bg_img': bgImg,
+              'date': date,
+              'participants': [],
+            }),
+          );
+
+          if (response.statusCode == 201) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to create activity: ${response.body}")),
+            );
+          }
+        },
         child: const Text('Create Activity', style: TextStyle(color: Colors.black)),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

@@ -52,5 +52,13 @@ class User {
 
   String toJson() => json.encode(toMap());
 
-  factory User.fromJson(String source) => User.fromMap(json.decode(source));
+  factory User.fromJson(dynamic source) {
+    if (source is String) {
+      return User.fromMap(json.decode(source));
+    } else if (source is Map<String, dynamic>) {
+      return User.fromMap(source);
+    } else {
+      throw Exception('Invalid type for User.fromJson');
+    }
+  }
 }

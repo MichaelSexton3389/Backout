@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:BackOut/services/user_service.dart';
 import 'dart:convert';
 import 'chat_screen.dart';
 
