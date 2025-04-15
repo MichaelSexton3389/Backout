@@ -483,6 +483,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+				baseConfigurationReference = "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig";
 			};
 			name = Profile;
 		};
@@ -669,6 +670,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+				baseConfigurationReference = "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig";
 			};
 			name = Debug;
 		};
@@ -691,6 +693,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+				baseConfigurationReference = "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig";
 			};
 			name = Release;
 		};

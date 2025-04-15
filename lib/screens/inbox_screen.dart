@@ -3,6 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:BackOut/services/user_service.dart';
 import 'dart:convert';
 import 'chat_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'firebase_chat_screen.dart';
 
 class InboxScreen extends StatefulWidget {
   final String currentUser; // Logged-in user
@@ -67,14 +70,23 @@ class _InboxScreenState extends State<InboxScreen> {
                         : null,
                   ),
                   title: Text(users[index]['name']!),
-                  onTap: () {
-                    // Navigate to ChatScreen with selected user as User 2
+                  onTap: () async {
+                    // Anonymous sign in to Firebase
+                    await FirebaseAuth.instance.signInAnonymously();
+
+                    // Create a dummy Firebase user (you can map Mongo ID to Firebase later)
+                    final firebaseUser = types.User(
+                      id: users[index]['id'], // Use MongoDB ID as Firebase UID
+                      firstName: users[index]['name'],
+                      imageUrl: users[index]['profile_picture'],
+                    );
+
+                    // Navigate to new Firebase chat screen
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ChatScreen(
-                          currentUser: widget.currentUser,
-                          receiverUser: users[index]['name']!, // Set as User 2
+                        builder: (context) => FirebaseChatScreen(
+                          peerUser: firebaseUser,
                         ),
                       ),
                     );
