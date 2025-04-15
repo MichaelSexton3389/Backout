@@ -4,14 +4,14 @@ import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 import 'package:BackOut/screens/ProfileScreen.dart';
 import 'package:BackOut/widgets/activity_card.dart';
-// import 'package:BackOut/widgets/create_acitivity_form.dart';
 import 'package:BackOut/widgets/modal_background.dart';
 import 'package:BackOut/screens/inbox_screen.dart';
 import 'package:BackOut/widgets/glassmorphic_container.dart';
-import 'package:BackOut/widgets/activity_pals_invite.dart';
 import 'package:BackOut/widgets/create_activty_form.dart';
 import 'package:BackOut/screens/buddy_req_screen.dart';
 import 'package:BackOut/screens/calendar_screen.dart';
+import 'package:BackOut/utils/navbar_utils.dart';  // Import the navbar utilities
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -54,8 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _nextActivity() {
     setState(() {
-      _currentActivityIndex =
-          (_currentActivityIndex + 1) % activities.length;
+      _currentActivityIndex = (_currentActivityIndex + 1) % activities.length;
     });
   }
 
@@ -64,83 +63,17 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = Provider.of<UserProvider>(context).user;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("BackOut"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_today, size: 26),
-            tooltip: "Calendar",
-            onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CalendarScreen(),
-            ),
-          );
-        },
-          ),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline, size: 30),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InboxScreen(currentUser: user.name),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: CircleAvatar(
-              radius: 15,
-              backgroundImage: user.profilePicture != null &&
-                      user.profilePicture!.isNotEmpty
-                  ? NetworkImage(user.profilePicture!)
-                  : null,
-              backgroundColor: Colors.grey.shade300,
-              child: user.profilePicture == null || user.profilePicture!.isEmpty
-                  ? const Icon(Icons.account_circle,
-                      size: 30, color: Colors.white)
-                  : null,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileScreen(
-                    currentUser: user,
-                    profileUser: user,
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(user.name),
-              accountEmail: Text(user.email),
-              decoration: BoxDecoration(
-                color: Colors.black,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text("Sign Out"),
-              onTap: () async {
-                AuthService().signOut(context: context);
-              },
-            ),
-          ],
-        ),
-      ),
+      // Use the NavBarUtils to build the AppBar
+      appBar: NavBarUtils.buildAppBar(context),
+      
+      // Use the NavBarUtils to build the Drawer
+      drawer: NavBarUtils.buildDrawer(context),
+      
+      // Add the bottom navigation bar
+      bottomNavigationBar: NavBarUtils.buildBottomNavBar(context, 0), // 0 is for Home tab
+      
       body: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -152,23 +85,20 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 500),
-                transitionBuilder:
-                    (Widget child, Animation<double> animation) {
+                transitionBuilder: (Widget child, Animation<double> animation) {
                   return FadeTransition(
                     opacity: animation,
                     child: child,
                   );
                 },
                 child: ActivityCard(
-                  key: ValueKey(
-                      activities[_currentActivityIndex]["title"]),
+                  key: ValueKey(activities[_currentActivityIndex]["title"]),
                   title: activities[_currentActivityIndex]["title"]!,
                   date: activities[_currentActivityIndex]["date"]!,
                   time: activities[_currentActivityIndex]["time"]!,
                   location: activities[_currentActivityIndex]["location"]!,
                   imageUrl: activities[_currentActivityIndex]["imageUrl"]!,
-                  description:
-                      activities[_currentActivityIndex]["description"]!,
+                  description: activities[_currentActivityIndex]["description"]!,
                 ),
               ),
             ),
