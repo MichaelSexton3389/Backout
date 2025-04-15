@@ -88,7 +88,7 @@ void showEditProfilePicModal() {
 void updateProfilePicture(String newImageUrl) async {
   final userId = widget.profileUser.id;
   final response = await http.put(
-    Uri.parse("http://localhost:3000/api/user/update-photo"),
+    Uri.parse("https://my-backend-service-952120514384.us-central1.run.app/api/user/update-photo"),
     headers: {"Content-Type": "application/json"},
     body: jsonEncode({
       "userId": userId,
@@ -107,7 +107,7 @@ void updateProfilePicture(String newImageUrl) async {
   void fetchPalCount() async {
     final userId = widget.profileUser.id;
     final response = await http
-        .get(Uri.parse("http://localhost:3000/api/user/$userId/pal-count"));
+        .get(Uri.parse("https://my-backend-service-952120514384.us-central1.run.app/api/user/$userId/pal-count"));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -118,7 +118,7 @@ void updateProfilePicture(String newImageUrl) async {
 
   void fetchActivityCount() async {
     final userId = widget.profileUser.id;
-    final response = await http.get(Uri.parse("http://localhost:3000/api/user/$userId/activity-count"));
+    final response = await http.get(Uri.parse("https://my-backend-service-952120514384.us-central1.run.app/api/user/$userId/activity-count"));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -273,7 +273,7 @@ void updateProfilePicture(String newImageUrl) async {
   void updateBio() async {
     final userId = widget.profileUser.id;
     final response = await http.put(
-      Uri.parse("http://localhost:3000/api/user/update-bio"),
+      Uri.parse("https://my-backend-service-952120514384.us-central1.run.app/api/user/update-bio"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "userId": userId,
