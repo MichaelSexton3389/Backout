@@ -12,6 +12,8 @@ import 'package:BackOut/widgets/activity_pals_invite.dart';
 import 'package:BackOut/widgets/create_activty_form.dart';
 import 'package:BackOut/screens/buddy_req_screen.dart';
 import 'package:BackOut/screens/calendar_screen.dart';
+import 'package:BackOut/widgets/navbar.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -66,140 +68,43 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("BackOut"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_today, size: 26),
-            tooltip: "Calendar",
-            onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CalendarScreen(),
-            ),
-          );
-        },
-          ),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_outline, size: 30),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InboxScreen(currentUser: user.name),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: CircleAvatar(
-              radius: 15,
-              backgroundImage: user.profilePicture != null &&
-                      user.profilePicture!.isNotEmpty
-                  ? NetworkImage(user.profilePicture!)
-                  : null,
-              backgroundColor: Colors.grey.shade300,
-              child: user.profilePicture == null || user.profilePicture!.isEmpty
-                  ? const Icon(Icons.account_circle,
-                      size: 30, color: Colors.white)
-                  : null,
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProfileScreen(
-                    currentUser: user,
-                    profileUser: user,
+      ),
+      
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onVerticalDragEnd: (details) {
+                    if (details.primaryVelocity! < 2) {
+                      _nextActivity(); // Swipe up to change activity
+                    }
+                  },
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    transitionBuilder: (Widget child, Animation<double> animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      );
+                    },
+                    child: ActivityCard(
+                      key: ValueKey(activities[_currentActivityIndex]["title"]),
+                      title: activities[_currentActivityIndex]["title"]!,
+                      date: activities[_currentActivityIndex]["date"]!,
+                      time: activities[_currentActivityIndex]["time"]!,
+                      location: activities[_currentActivityIndex]["location"]!,
+                      imageUrl: activities[_currentActivityIndex]["imageUrl"]!,
+                      description: activities[_currentActivityIndex]["description"]!,
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(user.name),
-              accountEmail: Text(user.email),
-              decoration: BoxDecoration(
-                color: Colors.black,
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text("Sign Out"),
-              onTap: () async {
-                AuthService().signOut(context: context);
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            GestureDetector(
-              onVerticalDragEnd: (details) {
-                if (details.primaryVelocity! < 2) {
-                  _nextActivity(); // Swipe up to change activity
-                }
-              },
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                transitionBuilder:
-                    (Widget child, Animation<double> animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  );
-                },
-                child: ActivityCard(
-                  key: ValueKey(
-                      activities[_currentActivityIndex]["title"]),
-                  title: activities[_currentActivityIndex]["title"]!,
-                  date: activities[_currentActivityIndex]["date"]!,
-                  time: activities[_currentActivityIndex]["time"]!,
-                  location: activities[_currentActivityIndex]["location"]!,
-                  imageUrl: activities[_currentActivityIndex]["imageUrl"]!,
-                  description:
-                      activities[_currentActivityIndex]["description"]!,
-                ),
-              ),
-            ),
-            // const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CreateActivityButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      barrierColor: Colors.black12,
-                      builder: (context) {
-                        return FractionallySizedBox(
-                          heightFactor: 0.85,
-                          child: ModalBackground(
-                            child: Material(
-                              type: MaterialType.transparency,
-                              child: CreateActivityFormUpdated(),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(width: 20),
-                BuddyRequestButton(
-                  onPressed: () {
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -207,84 +112,86 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   },
+                  child: GlassmorphicContainer(
+                    width: 150,
+                    height: 150,
+                    child: Center(
+                      child: ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [
+                            Color.fromARGB(255, 55, 189, 141),
+                            Color.fromARGB(255, 17, 90, 74),
+                          ],
+                        ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
+                        child: const Text(
+                          "Find Buddies",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
+                const SizedBox(height: 20),
               ],
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CreateActivityButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const CreateActivityButton({Key? key, required this.onPressed})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: GlassmorphicContainer(
-        width: 150,
-        height: 150,
-        child: Center(
-          child: ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              colors: [
-                Color.fromARGB(255, 169, 55, 189),
-                Color.fromARGB(255, 74, 17, 90),
-              ],
-            ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
-            child: const Text(
-              "Ready to get Back Out?",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white, // Will be masked by shader
-              ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class BuddyRequestButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const BuddyRequestButton({Key? key, required this.onPressed})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: GlassmorphicContainer(
-        width: 150,
-        height: 150,
-        child: Center(
-          child: ShaderMask(
-            shaderCallback: (bounds) => const LinearGradient(
-              colors: [
-                Color.fromARGB(255, 55, 189, 141),
-                Color.fromARGB(255, 17, 90, 74),
-              ],
-            ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
-            child: const Text(
-              "Find Buddies",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+          FloatingNavBar(
+            currentIndex: 0,
+            profileImageUrl: user.profilePicture,
+            onTap: (index) {
+              if (index == 0) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                );
+              } else if (index == 1) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CalendarScreen()),
+                );
+              } else if (index == 2) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  barrierColor: Colors.black12,
+                  builder: (context) {
+                    return FractionallySizedBox(
+                      heightFactor: 0.85,
+                      child: ModalBackground(
+                        child: Material(
+                          type: MaterialType.transparency,
+                          child: CreateActivityFormUpdated(),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              } else if (index == 3) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InboxScreen(currentUser: user.name),
+                  ),
+                );
+              } else if (index == 4) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfileScreen(
+                      currentUser: user,
+                      profileUser: user,
+                    ),
+                  ),
+                );
+              }
+            },
           ),
-        ),
+        ],
       ),
     );
   }

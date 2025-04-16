@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 import 'package:BackOut/providers/user_providers.dart';
 import 'package:BackOut/models/user.dart';
@@ -311,6 +312,28 @@ void updateProfilePicture(String newImageUrl) async {
     return Scaffold(
         extendBodyBehindAppBar: true, // ✅ Allows image to extend to the top
         backgroundColor: bg_color, // ✅ Ensures a clean fullscreen look
+        endDrawer: Drawer(
+          backgroundColor: Colors.black.withOpacity(0.05),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
+                accountName: Text(widget.profileUser.name),
+                accountEmail: Text(widget.profileUser.email),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.1),
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.white),
+                title: const Text("Sign Out", style: TextStyle(color: Colors.white)),
+                onTap: () async {
+                  AuthService().signOut(context: context);
+                },
+              ),
+            ],
+          ),
+        ),
         body: Stack(
           children: [
             // ✅ Gradient Background Using Profile Picture's Dominant Color
@@ -406,6 +429,18 @@ void updateProfilePicture(String newImageUrl) async {
                                 child: Center(
                                   child: Icon(Icons.arrow_back, color: Colors.white), // ✅ White arrow
                                 ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            top: 70,
+                            right: 30,
+                            child: Builder(
+                              builder: (context) => IconButton(
+                                icon: Icon(Icons.menu, color: Colors.white),
+                                onPressed: () {
+                                  Scaffold.of(context).openEndDrawer();
+                                },
                               ),
                             ),
                           ),
