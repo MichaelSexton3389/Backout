@@ -16,7 +16,6 @@ import 'package:BackOut/widgets/navbar.dart';
 import 'package:BackOut/screens/pals.dart';
 import 'package:BackOut/screens/upcoming.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -59,8 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _nextActivity() {
     setState(() {
-      _currentActivityIndex =
-          (_currentActivityIndex + 1) % activities.length;
+      _currentActivityIndex = (_currentActivityIndex + 1) % activities.length;
     });
   }
 
@@ -155,152 +153,187 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           centerTitle: true,
         ),
-        
         body: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  GestureDetector(
-                    onVerticalDragEnd: (details) {
-                      if (details.primaryVelocity! < 2) {
-                        _nextActivity();
-                      }
-                    },
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: child,
-                        );
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onVerticalDragEnd: (details) {
+                        if (details.primaryVelocity! < 2) {
+                          _nextActivity();
+                        }
                       },
-                      child: ActivityCard(
-                        key: ValueKey(activities[_currentActivityIndex]["title"]),
-                        title: activities[_currentActivityIndex]["title"]!,
-                        date: activities[_currentActivityIndex]["date"]!,
-                        time: activities[_currentActivityIndex]["time"]!,
-                        location: activities[_currentActivityIndex]["location"]!,
-                        imageUrl: activities[_currentActivityIndex]["imageUrl"]!,
-                        description: activities[_currentActivityIndex]["description"]!,
-                      ),
-                    ),
-                  ),
-                  // const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const BuddyRequestScreen(),
-                            ),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 500),
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
                           );
                         },
-                        child: Stack(
-                          children: [
-                            Positioned.fill(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Container(
-                                  decoration: const BoxDecoration(
-                                    image: DecorationImage(
-                                      image: NetworkImage("https://images.pexels.com/photos/5795688/pexels-photo-5795688.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
+                        child: ActivityCard(
+                          key: ValueKey(
+                              activities[_currentActivityIndex]["title"]),
+                          title: activities[_currentActivityIndex]["title"]!,
+                          date: activities[_currentActivityIndex]["date"]!,
+                          time: activities[_currentActivityIndex]["time"]!,
+                          location: activities[_currentActivityIndex]
+                              ["location"]!,
+                          imageUrl: activities[_currentActivityIndex]
+                              ["imageUrl"]!,
+                          description: activities[_currentActivityIndex]
+                              ["description"]!,
+                        ),
+                      ),
+                    ),
+                    // const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            width: 150,
+                            height: 300,
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage('assets/post img.png'),
+                                fit: BoxFit.cover,
                               ),
                             ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        // Right side: Column for Find Buddies & Streak stacked vertically
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Find Buddies widget
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const BuddyRequestScreen(),
+                                  ),
+                                );
+                              },
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Container(
+                                        decoration: const BoxDecoration(
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                "https://images.pexels.com/photos/5795688/pexels-photo-5795688.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Container(
+                                      width: 150,
+                                      height: 150,
+                                      color: Colors.black.withOpacity(0.4),
+                                      alignment: Alignment.bottomCenter,
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12),
+                                      child: ShaderMask(
+                                        shaderCallback: (bounds) =>
+                                            const LinearGradient(
+                                          colors: [Colors.white, Colors.white],
+                                        ).createShader(Rect.fromLTWH(0, 0,
+                                                bounds.width, bounds.height)),
+                                        child: const Text(
+                                          "Find Buddies",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                            shadows: [
+                                              Shadow(
+                                                offset: Offset(0, 1),
+                                                blurRadius: 2,
+                                                color: Colors.black45,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // Streak widget
                             ClipRRect(
                               borderRadius: BorderRadius.circular(16),
                               child: Container(
                                 width: 150,
                                 height: 150,
-                                color: Colors.black.withOpacity(0.4),
-                                alignment: Alignment.bottomCenter,
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: ShaderMask(
-                                  shaderCallback: (bounds) => const LinearGradient(
-                                    colors: [Colors.white, Colors.white],
-                                  ).createShader(Rect.fromLTWH(0, 0, bounds.width, bounds.height)),
-                                  child: const Text(
-                                    "Find Buddies",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                      shadows: [
-                                        Shadow(
-                                          offset: Offset(0, 1),
-                                          blurRadius: 2,
-                                          color: Colors.black45,
-                                        ),
-                                      ],
+                                color: Colors.white,
+                                child: Stack(
+                                  children: [
+                                    // Fire emoji near top-left
+                                    Positioned(
+                                      top: 5,
+                                      left: 10,
+                                      child: Text(
+                                        "🔥",
+                                        style: TextStyle(fontSize: 54),
+                                      ),
                                     ),
-                                  ),
+                                    // Center the streak number & subtext
+                                    Center(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            "3",
+                                            style: TextStyle(
+                                              fontSize: 56,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          const Text(
+                                            "#2 amongst buddies",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 20),
-                      ClipRRect(
-  borderRadius: BorderRadius.circular(16),
-  child: Container(
-    width: 150,
-    height: 150,
-    color: Colors.white,
-    child: Stack(
-      children: [
-        // Fire emoji near top-left
-        Positioned(
-          top: 5,
-          left: 10,
-          child: Text(
-            "🔥",
-            style: TextStyle(fontSize: 54), // larger flame
-          ),
-        ),
-        // Center the streak number & subtext
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "3", // Streak count
-                style: TextStyle(
-                  fontSize: 56, // big, bold number
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "#2 amongst buddies", // subtext
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  ),
-),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                ],
               ),
             ),
             FloatingNavBar(
