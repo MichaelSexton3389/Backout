@@ -54,5 +54,10 @@
 		<true/>
 	</dict>
 
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to photo library to send images in chat</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to take photos to send in chat</string>
+
 </dict>
 </plist>
