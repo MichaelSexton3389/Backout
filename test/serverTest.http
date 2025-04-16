@@ -161,3 +161,14 @@ Content-Type: application/json
   "targetUserId": "67eed32c08eac4a2905358b8"
 }
 ###
+
+# Get pals' upcoming activity details for a user
+GET http://localhost:3000/api/user/67a294df86e65bfed00aa6c9/pals/upcoming-activity-details
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+
+###
+
+# Get Pals
+GET http://localhost:3000/api/user/67a294df86e65bfed00aa6c9/pals
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+

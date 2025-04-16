@@ -37,4 +37,5 @@ flutter:
   assets:
     - assets/logo.png
     - assets/pexels.json
+    - assets/mountain_logo.svg
 
