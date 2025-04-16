@@ -24,7 +24,7 @@ dependencies:
   palette_generator: ^0.3.3
   google_fonts: ^6.1.0
   table_calendar: ^3.0.8
-  
+  image_picker: ^1.0.7
 
 dev_dependencies:
   flutter_test:
