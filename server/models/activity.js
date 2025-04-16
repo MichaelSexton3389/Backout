@@ -33,6 +33,9 @@ const activitySchema = new Schema({
     ref: 'User', // References the User model
     default: []
   }],
+  imageURL:[{
+    
+  }],
   created_at: {
     type: Date,
     default: Date.now
