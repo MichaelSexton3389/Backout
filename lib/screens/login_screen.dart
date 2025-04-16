@@ -54,13 +54,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 Center(
                   child: SvgPicture.asset(
                     'assets/mountain_logo.svg',
-                    height: 500,
+                    height: 450,
                   ),
                 ),
-                const SizedBox(height: 10),
-                const SizedBox(height: 20),
+                // const SizedBox(height: 10),
+                // const SizedBox(height: 20),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
                   child: Center(
                     child: Text(
                       selectedQuote,

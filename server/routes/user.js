@@ -128,6 +128,169 @@ userRouter.get("/:userId/pals", async (req, res) => {
     }
 });
 
+userRouter.get("/:userId/upcoming-activity-details", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId);
+    if (!user || !user.activities || user.activities.length === 0) {
+      return res.status(404).json({ msg: "No activities found for this user." });
+    }
+
+    const activities = await Activity.find({
+      _id: { $in: user.activities },
+      date: { $gte: new Date() } // Only fetch future activities
+    }).populate("created_by", "name email");
+
+    const mappedActivities = activities.map(activity => ({
+      _id: activity._id,
+      title: activity.title,
+      bg_img: activity.bg_img,
+      description: activity.description,
+      location: activity.location,
+      date: activity.date,
+      created_by: activity.created_by,
+      participants: activity.participants,
+      imageURL: activity.imageURL,
+      created_at: activity.created_at
+    }));
+
+    res.status(200).json({ activities: mappedActivities });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+userRouter.get("/:userId/past-activities", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId);
+    if (!user || !user.activities || user.activities.length === 0) {
+      return res.status(404).json({ msg: "No activities found for this user." });
+    }
+
+    const activities = await Activity.find({
+      _id: { $in: user.activities },
+      date: { $lt: new Date() } // Only past activities
+    }).populate("created_by", "name email");
+
+    const mappedActivities = activities.map(activity => ({
+      _id: activity._id,
+      title: activity.title,
+      bg_img: activity.bg_img,
+      description: activity.description,
+      location: activity.location,
+      date: activity.date,
+      created_by: activity.created_by,
+      participants: activity.participants,
+      imageURL: activity.imageURL,
+      created_at: activity.created_at
+    }));
+
+    res.status(200).json({ activities: mappedActivities });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+userRouter.get("/:userId/pals/upcoming-activity-details", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Get user and populate pals' activity lists
+    const user = await User.findById(userId).populate({
+      path: "pals",
+      populate: {
+        path: "activities",
+        match: { date: { $gte: new Date() } }, // only future activities
+        populate: {
+          path: "created_by",
+          select: "name email"
+        }
+      }
+    });
+
+    if (!user || !user.pals || user.pals.length === 0) {
+      return res.status(404).json({ msg: "This user has no pals." });
+    }
+
+    const results = user.pals.map(pal => ({
+      _id: pal._id,
+      name: pal.name,
+      profile_picture: pal.profile_picture,
+      bio: pal.bio,
+      upcoming_activities: (pal.activities || []).map(activity => ({
+        _id: activity._id,
+        title: activity.title,
+        bg_img: activity.bg_img,
+        description: activity.description,
+        location: activity.location,
+        date: activity.date,
+        created_by: activity.created_by,
+        participants: activity.participants,
+        imageURL: activity.imageURL,
+        created_at: activity.created_at
+      }))
+    }));
+
+    const filteredResults = results.filter(pal => pal.upcoming_activities.length > 0);
+
+    if (filteredResults.length === 0) {
+      return res.status(200).json({ message: "No activity to show", palsWithUpcomingActivities: [] });
+    }
+
+    res.status(200).json({ palsWithUpcomingActivities: filteredResults });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+userRouter.get("/:userId/pals/past-activity-details", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId).populate({
+      path: "pals",
+      populate: {
+        path: "activities",
+        match: { date: { $lt: new Date() } }, // Only past activities
+        populate: {
+          path: "created_by",
+          select: "name email"
+        }
+      }
+    });
+
+    if (!user || !user.pals || user.pals.length === 0) {
+      return res.status(404).json({ msg: "This user has no pals." });
+    }
+
+    const results = user.pals.map(pal => ({
+      _id: pal._id,
+      name: pal.name,
+      profile_picture: pal.profile_picture,
+      bio: pal.bio,
+      past_activities: (pal.activities || []).map(activity => ({
+        _id: activity._id,
+        title: activity.title,
+        bg_img: activity.bg_img,
+        description: activity.description,
+        location: activity.location,
+        date: activity.date,
+        created_by: activity.created_by,
+        participants: activity.participants,
+        imageURL: activity.imageURL,
+        created_at: activity.created_at
+      }))
+    }));
+
+    res.status(200).json({ palsWithPastActivities: results });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 
 
 module.exports = userRouter;

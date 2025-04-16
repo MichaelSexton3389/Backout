@@ -53,18 +53,16 @@ class _SignupScreenState extends State<SignupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 60),
-                // Mountain logo SVG
+                const SizedBox(height: 20),
                 Center(
                   child: SvgPicture.asset(
                     'assets/mountain_logo.svg',
-                    height: 500,
+                    height: 450,
                   ),
                 ),
-                const SizedBox(height: 10),
-                const SizedBox(height: 20),
+                // const SizedBox(height: 10),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
                   child: Center(
                     child: Text(
                       selectedQuote,
@@ -76,7 +74,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 250),
+                const SizedBox(height: 20),
               ],
             ),
           ),
