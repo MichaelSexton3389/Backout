@@ -53,8 +53,10 @@ class FloatingNavBar extends StatelessWidget {
       onTap: () => onTap(index),
       child: Icon(
         icon,
-        color: currentIndex == index ? const Color.fromARGB(255, 255, 255, 255) : Colors.grey,
-        size: 28,
+        color: currentIndex == index
+            ? const Color(0xFFFF5C57) // Hot Coral – Friendly + rebellious mix
+            : const Color(0xFFB0BEC5), // Soft pastel blue-grey for inactive
+        size: 30,
       ),
     );
   }
@@ -64,7 +66,9 @@ class FloatingNavBar extends StatelessWidget {
       onTap: () => onTap(index),
       child: CircleAvatar(
         radius: 16,
-        backgroundColor: currentIndex == index ? Colors.blue : Colors.grey.shade300,
+        backgroundColor: currentIndex == index
+            ? const Color(0xFFFF4081) // Fun pink for active profile
+            : const Color(0xFFCFD8DC), // Soft grey-blue for inactive
         backgroundImage: (profileImageUrl != null && profileImageUrl!.isNotEmpty)
             ? NetworkImage(profileImageUrl!)
             : null,

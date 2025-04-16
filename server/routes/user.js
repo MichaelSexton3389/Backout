@@ -92,7 +92,7 @@ userRouter.post("/addPal", authMiddleware, async (req, res) => {
   }
 });
 
-userRouter.get("/user/:userId/pal-count", async (req, res) => {
+userRouter.get("/:userId/pal-count", async (req, res) => {
     try {
       const user = await User.findById(req.params.userId);
       res.json({ palCount: user.pals.length });
@@ -101,7 +101,7 @@ userRouter.get("/user/:userId/pal-count", async (req, res) => {
     }
   });
 
-userRouter.get("/user/:userId/activity-count", async (req, res) => {
+userRouter.get("/:userId/activity-count", async (req, res) => {
     try {
       const user = await User.findById(req.params.userId);
       res.json({ activityCount: user.activities.length });
