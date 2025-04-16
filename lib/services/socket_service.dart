@@ -35,13 +35,15 @@ class SocketService {
          });
     }
 
-  void sendMessage(String sender, String receiver, String message) {
-    if(!_isConnected) return;
-    socket.emit('sendMessage', {
-      'sender': sender,
-      'receiver': receiver,
-      'message': message,
-    });
+  void sendMessage(String sender, String receiver, String message, {bool isImage = false}) {
+    if (socket != null) {
+      socket.emit('message', {
+        'sender': sender,
+        'receiver': receiver,
+        'message': message,
+        'isImage': isImage,
+      });
+    }
   }
 
   void removeListener(){
