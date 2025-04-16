@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
           end: Alignment.bottomRight,
           colors: [
             Color(0xFF6A1B1A), // Deep red top left
-            Color(0xFF000000), // Dark center
+            // Color(0xFF000000), // Dark center
             Color(0xFF0D3B4C), // Dark bluish bottom right
           ],
         ),
