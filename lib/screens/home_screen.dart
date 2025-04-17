@@ -4,7 +4,6 @@ import 'package:BackOut/services/auth_services.dart';
 import 'package:provider/provider.dart';
 import 'package:BackOut/screens/ProfileScreen.dart';
 import 'package:BackOut/widgets/activity_card.dart';
-// import 'package:BackOut/widgets/create_acitivity_form.dart';
 import 'package:BackOut/widgets/modal_background.dart';
 import 'package:BackOut/screens/inbox_screen.dart';
 import 'package:BackOut/widgets/glassmorphic_container.dart';
@@ -15,6 +14,7 @@ import 'package:BackOut/screens/calendar_screen.dart';
 import 'package:BackOut/widgets/navbar.dart';
 import 'package:BackOut/screens/pals.dart';
 import 'package:BackOut/screens/upcoming.dart';
+import 'package:BackOut/screens/leaderboard.dart'; // Add this import
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -28,8 +28,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentActivityIndex = 0;
-List<dynamic> activities = [];
-bool isLoading = true;
+  List<dynamic> activities = [];
+  bool isLoading = true;
 
   void _nextActivity() {
     setState(() {
@@ -37,33 +37,34 @@ bool isLoading = true;
     });
   }
 
-Future<void> fetchActivities() async {
-  final user = Provider.of<UserProvider>(context, listen: false).user;
-  final url = Uri.parse('http://localhost:3000/api/user/${user.id}/upcoming-activity-details');
-  try {
-    final response = await http.get(
-      url,
-      headers: {'Authorization': 'Bearer ${user.token}'},
-    );
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      setState(() {
-        activities = data['activities'];
-        isLoading = false;
-      });
-    } else {
+  Future<void> fetchActivities() async {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final url = Uri.parse('http://localhost:3000/api/user/${user.id}/upcoming-activity-details');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer ${user.token}'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        setState(() {
+          activities = data['activities'];
+          isLoading = false;
+        });
+      } else {
+        setState(() => isLoading = false);
+      }
+    } catch (_) {
       setState(() => isLoading = false);
     }
-  } catch (_) {
-    setState(() => isLoading = false);
   }
-}
 
-@override
-void initState() {
-  super.initState();
-  WidgetsBinding.instance.addPostFrameCallback((_) => fetchActivities());
-}
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => fetchActivities());
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
@@ -75,7 +76,6 @@ void initState() {
           end: Alignment.bottomRight,
           colors: [
             Color(0xFF6A1B1A), // Deep red top left
-            // Color(0xFF000000), // Dark center
             Color(0xFF0D3B4C), // Dark bluish bottom right
           ],
         ),
@@ -179,32 +179,31 @@ void initState() {
                             child: child,
                           );
                         },
-                      child: isLoading
-  ? SizedBox(
-      height: 300,
-      child: Center(child: CircularProgressIndicator()),
-    )
-  : activities.isEmpty
-    ? SizedBox(
-        height: 300,
-        child: Center(child: Text('No upcoming activities')),
-      )
-    : ActivityCard(
-        key: ValueKey(activities[_currentActivityIndex]['_id']),
-        title: activities[_currentActivityIndex]['title'] ?? '',
-        date: DateFormat.yMMMd().add_jm().format(
-          DateTime.parse(
-            activities[_currentActivityIndex]['date'] as String
-          ),
-        ),
-        time: '',
-        location: activities[_currentActivityIndex]['location'] ?? '',
-        imageUrl: activities[_currentActivityIndex]['bg_img'] ?? '',
-        description: activities[_currentActivityIndex]['description'] ?? '',
-      ),
+                        child: isLoading
+                            ? SizedBox(
+                                height: 300,
+                                child: Center(child: CircularProgressIndicator()),
+                              )
+                            : activities.isEmpty
+                                ? SizedBox(
+                                    height: 300,
+                                    child: Center(child: Text('No upcoming activities')),
+                                  )
+                                : ActivityCard(
+                                    key: ValueKey(activities[_currentActivityIndex]['_id']),
+                                    title: activities[_currentActivityIndex]['title'] ?? '',
+                                    date: DateFormat.yMMMd().add_jm().format(
+                                      DateTime.parse(
+                                        activities[_currentActivityIndex]['date'] as String
+                                      ),
+                                    ),
+                                    time: '',
+                                    location: activities[_currentActivityIndex]['location'] ?? '',
+                                    imageUrl: activities[_currentActivityIndex]['bg_img'] ?? '',
+                                    description: activities[_currentActivityIndex]['description'] ?? '',
+                                  ),
                       ),
                     ),
-                    // const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -292,50 +291,60 @@ void initState() {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // Streak widget
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Container(
-                                width: 150,
-                                height: 150,
-                                color: Colors.white,
-                                child: Stack(
-                                  children: [
-                                    // Fire emoji near top-left
-                                    Positioned(
-                                      top: 5,
-                                      left: 10,
-                                      child: Text(
-                                        "🔥",
-                                        style: TextStyle(fontSize: 54),
+                            // Streak widget with navigation to LeaderboardScreen
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LeaderboardScreen(),
+                                  ),
+                                );
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  width: 150,
+                                  height: 150,
+                                  color: Colors.white,
+                                  child: Stack(
+                                    children: [
+                                      // Fire emoji near top-left
+                                      Positioned(
+                                        top: 5,
+                                        left: 10,
+                                        child: Text(
+                                          "🔥",
+                                          style: TextStyle(fontSize: 54),
+                                        ),
                                       ),
-                                    ),
-                                    // Center the streak number & subtext
-                                    Center(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            "3",
-                                            style: TextStyle(
-                                              fontSize: 56,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
+                                      // Center the streak number & subtext
+                                      Center(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              "3",
+                                              style: TextStyle(
+                                                fontSize: 56,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          const Text(
-                                            "#2 amongst buddies",
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.black87,
+                                            const SizedBox(height: 4),
+                                            const Text(
+                                              "#2 amongst buddies",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.black87,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
