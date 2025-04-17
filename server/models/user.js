@@ -57,7 +57,7 @@ const userSchema = mongoose.Schema({
       }
     },
 
-    Badges: [{
+    interest: [{
         type: String
     }],
 

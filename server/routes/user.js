@@ -336,10 +336,10 @@ userRouter.get('/:userId/badges', async (req, res) => {
 });
 
 // PATCH add a badge (no duplicates)
-userRouter.patch('/:userId/badges', async (req, res) => {
+userRouter.patch('/:userId/interests', async (req, res) => {
   try {
-    const { badge } = req.body;
-    if (!badge) return res.status(400).json({ msg: 'Badge is required' });
+    const { interest } = req.body;
+    if (!interest) return res.status(400).json({ msg: 'Badge is required' });
 
     const updated = await User.findByIdAndUpdate(
       req.params.userId,
@@ -348,7 +348,7 @@ userRouter.patch('/:userId/badges', async (req, res) => {
     );
     if (!updated) return res.status(404).json({ msg: 'User not found' });
 
-    res.json(updated.Badges);
+    res.json(updated.interest);
   } catch (err) {
     console.error(err);
     res.status(500).json({ msg: 'Server error' });
