@@ -1,3 +1,3 @@
 class Constants {
-  static String uri = 'http://localhost:3000';
+  static String uri = 'https://backout-server-952120514384.us-central1.run.app/';
 }

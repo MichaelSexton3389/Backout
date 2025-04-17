@@ -1,6 +1,7 @@
 const express = require("express");
 const userRouter = express.Router();
 const User = require("../models/user");
+const Activity = require("../models/activity");
 const authMiddleware = require("../middleware/userAuth");
 
 // ✅ Fetch Users (Now Includes Bio)
@@ -290,6 +291,72 @@ userRouter.get("/:userId/pals/past-activity-details", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
+
+userRouter.patch('/:userId/streak', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId, 'Streak');
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    const nowDate = stripTime(new Date());
+    const lastDate = stripTime(user.Streak.lastChanged);
+
+    let newCount;
+    if (+lastDate === +nowDate) {
+      // already updated today → do nothing
+      newCount = user.Streak.current;
+    } else if (+lastDate === +new Date(nowDate - 24*3600*1000)) {
+      // lastChanged was exactly yesterday → increment
+      newCount = user.Streak.current + 1;
+    } else {
+      // gap of ≥2 days → reset to 0
+      newCount = 0;
+    }
+
+    user.Streak.current = newCount;
+    user.Streak.lastChanged = new Date();
+    await user.save();
+
+    res.json(user.Streak);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// GET badges list
+userRouter.get('/:userId/badges', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId, 'Badges');
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+    res.json(user.Badges);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// PATCH add a badge (no duplicates)
+userRouter.patch('/:userId/interests', async (req, res) => {
+  try {
+    const { interest } = req.body;
+    if (!interest) return res.status(400).json({ msg: 'Badge is required' });
+
+    const updated = await User.findByIdAndUpdate(
+      req.params.userId,
+      { $addToSet: { Badges: badge } },
+      { new: true, select: 'Badges' }
+    );
+    if (!updated) return res.status(404).json({ msg: 'User not found' });
+
+    res.json(updated.interest);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+
 
 
 
