@@ -1,6 +1,7 @@
 const express = require("express");
 const userRouter = express.Router();
 const User = require("../models/user");
+const Activity = require("../models/activity");
 const authMiddleware = require("../middleware/userAuth");
 
 // ✅ Fetch Users (Now Includes Bio)

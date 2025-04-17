@@ -15,6 +15,9 @@ import 'package:BackOut/screens/calendar_screen.dart';
 import 'package:BackOut/widgets/navbar.dart';
 import 'package:BackOut/screens/pals.dart';
 import 'package:BackOut/screens/upcoming.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,36 +28,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentActivityIndex = 0;
-
-  final List<Map<String, String>> activities = [
-    {
-      "title": "Hiking at Chautauqua",
-      "date": "Saturday, Nov 3",
-      "time": "8 AM",
-      "location": "Chautauqua Trail Start",
-      "imageUrl":
-          "https://live.staticflickr.com/3500/3845264221_1435f80f18_c.jpg",
-      "description": "Perfect day to explore the Flatirons!"
-    },
-    {
-      "title": "Sunset Yoga",
-      "date": "Sunday, Nov 4",
-      "time": "6 PM",
-      "location": "Boulder Creek Park",
-      "imageUrl":
-          "https://live.staticflickr.com/7381/12369616423_2a5d035436_c.jpg",
-      "description": "Relax and unwind with an evening yoga session."
-    },
-    {
-      "title": "Rock Climbing",
-      "date": "Monday, Nov 5",
-      "time": "10 AM",
-      "location": "Eldorado Canyon",
-      "imageUrl":
-          "https://live.staticflickr.com/1568/25281518844_3ea51e32ef_c.jpg",
-      "description": "Challenge yourself with rock climbing."
-    },
-  ];
+List<dynamic> activities = [];
+bool isLoading = true;
 
   void _nextActivity() {
     setState(() {
@@ -62,6 +37,33 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+Future<void> fetchActivities() async {
+  final user = Provider.of<UserProvider>(context, listen: false).user;
+  final url = Uri.parse('http://localhost:3000/api/user/${user.id}/upcoming-activity-details');
+  try {
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer ${user.token}'},
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      setState(() {
+        activities = data['activities'];
+        isLoading = false;
+      });
+    } else {
+      setState(() => isLoading = false);
+    }
+  } catch (_) {
+    setState(() => isLoading = false);
+  }
+}
+
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) => fetchActivities());
+}
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
@@ -114,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              const Text(
+              const Text( 
                 "BackOut",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -177,19 +179,29 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: child,
                           );
                         },
-                        child: ActivityCard(
-                          key: ValueKey(
-                              activities[_currentActivityIndex]["title"]),
-                          title: activities[_currentActivityIndex]["title"]!,
-                          date: activities[_currentActivityIndex]["date"]!,
-                          time: activities[_currentActivityIndex]["time"]!,
-                          location: activities[_currentActivityIndex]
-                              ["location"]!,
-                          imageUrl: activities[_currentActivityIndex]
-                              ["imageUrl"]!,
-                          description: activities[_currentActivityIndex]
-                              ["description"]!,
-                        ),
+                      child: isLoading
+  ? SizedBox(
+      height: 300,
+      child: Center(child: CircularProgressIndicator()),
+    )
+  : activities.isEmpty
+    ? SizedBox(
+        height: 300,
+        child: Center(child: Text('No upcoming activities')),
+      )
+    : ActivityCard(
+        key: ValueKey(activities[_currentActivityIndex]['_id']),
+        title: activities[_currentActivityIndex]['title'] ?? '',
+        date: DateFormat.yMMMd().add_jm().format(
+          DateTime.parse(
+            activities[_currentActivityIndex]['date'] as String
+          ),
+        ),
+        time: '',
+        location: activities[_currentActivityIndex]['location'] ?? '',
+        imageUrl: activities[_currentActivityIndex]['bg_img'] ?? '',
+        description: activities[_currentActivityIndex]['description'] ?? '',
+      ),
                       ),
                     ),
                     // const SizedBox(height: 8),

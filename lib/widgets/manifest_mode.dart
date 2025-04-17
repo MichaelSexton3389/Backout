@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:BackOut/widgets/modal_background.dart';
 import 'package:BackOut/widgets/activity_pals_invite.dart';
 import 'package:BackOut/widgets/create_activty_form.dart';
-import 'package:assets/api_keys.json';
+// import 'package:assets/api_keys.json';
 
 class ManifestModeScreen extends StatefulWidget {
   const ManifestModeScreen({Key? key}) : super(key: key);
@@ -24,7 +24,8 @@ class _ManifestModeScreenState extends State<ManifestModeScreen> {
       {}; // In-memory cache for suggestions.
 
   // Replace with your actual API key.
-  final String _k ="gptkey" 
+  // final String _k ="gptkey" 
+  final String _k=""
       ;
 
   Future<void> _fetchSuggestions(String userInput) async {
