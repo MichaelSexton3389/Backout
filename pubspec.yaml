@@ -41,12 +41,28 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/logo.png
-
     - assets/service-account.json
 
     - assets/pexels.json
     - assets/mountain_logo.svg
     - assets/post img.png
 
-
+    - assets/logo.png
+    - assets/hockey.png
+    - assets/kayaking.png
+    - assets/lifting.png
+    - assets/profile_placeholder.png
+    - assets/running.png
+    - assets/skiing.png
+    - assets/snowboarding.png
+    - assets/soccer.png
+    - assets/swimming.png
+    - assets/three_circle_fill.png
+    - assets/pexels.json
+    - assets/mountain_logo.svg
+    - assets/post img.png
+    - assets/biking.png
+    - assets/football.png
+    - assets/hiking.png
+    - assets/swimming.png
+    - assets/basketball.png

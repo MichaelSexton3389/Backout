@@ -13,6 +13,7 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final AuthService authService = AuthService();
 
@@ -33,14 +34,44 @@ class _SignupScreenState extends State<SignupScreen> {
     selectedQuote = quotes[random.nextInt(quotes.length)];
   }
 
-  void signupUser() {
-    authService.signUpUser(
+  Future<void> signupUser() async {
+  // Show a loading spinner (optional)
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
+  );
+
+  try {
+    final success = await authService.signUpUser(
       context: context,
-      email: emailController.text,
+      email: emailController.text.trim(),
       password: passwordController.text,
-      name: '',
+      name: nameController.text.trim(),
+    );
+
+    Navigator.of(context).pop(); // remove the loader
+
+    if (success == true) {
+      // Navigate to RegistrationScreen and remove SignupScreen from the stack
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LoginScreen(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Signup failed. Please try again.')),
+      );
+    }
+  } catch (e) {
+    Navigator.of(context).pop(); // remove the loader
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: ${e.toString()}')),
     );
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +145,19 @@ class _SignupScreenState extends State<SignupScreen> {
                     controller: emailController,
                     decoration: InputDecoration(
                       hintText: 'Username / Email',
+                      filled: true,
+                      fillColor: Colors.grey[300],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      hintText: 'Name',
                       filled: true,
                       fillColor: Colors.grey[300],
                       border: OutlineInputBorder(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:BackOut/screens/signup_screen.dart';
 import 'package:BackOut/services/auth_services.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -148,6 +149,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     child: const Text('Login'),
+                  ),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SignupScreen(),
+                      ),
+                    ),
+                    child: const Text(
+                      'Do you not have an account? Sign up here',
+                      style: TextStyle(color: Colors.white70),
+                    ),
                   ),
                 ],
               ),
