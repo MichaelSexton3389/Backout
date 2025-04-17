@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:BackOut/services/gcs_services.dart';
 import 'dart:convert';
+import 'package:BackOut/utils/constants.dart';
 
 class ChatScreen extends StatefulWidget {
   final String currentUser;
@@ -65,7 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> fetchMessages() async {
     try {
       final response = await http.get(Uri.parse(
-          'https://my-backend-service-952120514384.us-central1.run.app/messages/${widget.currentUser}/${widget.receiverUser}'));
+          '${Constants.uri}${widget.currentUser}/${widget.receiverUser}'));
 
       if (response.statusCode == 200) {
         List<dynamic> messagesJson = json.decode(response.body);

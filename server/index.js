@@ -1,5 +1,5 @@
 // BACKEND URL TO ACCESS DB, HOSTED REMOTELY SO YOU DO NOT NEED TO RUN LOCALLY:
-// https://my-backend-service-952120514384.us-central1.run.app
+// https://backout-server-952120514384.us-central1.run.app
 
 
 
@@ -44,16 +44,16 @@ app.get("/", (req, res) => {
 });
 
 
-const DB = "mongodb+srv://mise3389:pSBZAUklT0E6pP9K@cluster1.d6p3k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
+const DB = "mongodb+srv://mise3389:Qtx2MwOzzmxEya8w@cluster1.d6p3k.mongodb.net/?retryWrites=true&w=majority&appName=Cluster1";
 
 mongoose
-    .connect(DB)
-    .then(() => {
-        console.log("Connection successful");
-    })
-    .catch((e) =>{
-        console.log(e);
-    });
+  .connect(DB)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err.message);
+  });
 
 // app.listen(PORT, "0.0.0.0", () => {
 //     console.log(`connected at port ${PORT}`);

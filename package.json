@@ -23,7 +23,7 @@
   "homepage": "https://github.com/MichaelSexton3389/Backout#readme",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.2"
-  },
-  "devDependencies": {}
+    "express": "^4.21.2",
+    "mongoose": "^8.13.2"
+  }
 }

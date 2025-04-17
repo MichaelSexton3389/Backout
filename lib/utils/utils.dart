@@ -17,17 +17,28 @@ void httpErrorHandle({
 }) {
   print('Status code: ${response.statusCode}');
   print('Response body: ${response.body}');
-  switch (response.statusCode) {
-    case 200:
-      onSuccess();
-      break;
-    case 400:
-      showSnackBar(context, jsonDecode(response.body)['msg']);
-      break;
-    case 500:
-      showSnackBar(context, jsonDecode(response.body)['error']);
-      break;
-    default:
-      showSnackBar(context, response.body);
+
+  try {
+    switch (response.statusCode) {
+      case 200:
+        onSuccess();
+        break;
+      case 400:
+        final body = jsonDecode(response.body);
+        print('error 400');
+        showSnackBar(context, body['msg'] ?? 'Unknown error');
+        break;
+      case 500:
+        final body = jsonDecode(response.body);
+        print('error 500');
+        print(body);
+        showSnackBar(context, body['error'] ?? 'Server error');
+        break;
+      default:
+        showSnackBar(context, "Unexpected error: ${response.body}");
+    }
+  } catch (e) {
+    print("Error decoding response: $e");
+    showSnackBar(context, "Invalid server response: ${response.body}");
   }
 }

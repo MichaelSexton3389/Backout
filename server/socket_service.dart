@@ -16,7 +16,7 @@ class SocketService {
   void connect() {
     if (_isConnected) return;
 
-    socket = IO.io('http://localhost:3000', <String, dynamic>{
+    socket = IO.io('https://backout-server-952120514384.us-central1.run.app', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
