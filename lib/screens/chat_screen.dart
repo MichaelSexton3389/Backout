@@ -6,12 +6,13 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:BackOut/services/gcs_services.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:BackOut/utils/constants.dart';
 
 class ChatScreen extends StatefulWidget {
   final String currentUser;
   final String receiverUser;
-
+ main
   ChatScreen({required this.currentUser, required this.receiverUser});
 
   @override
@@ -27,6 +28,35 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isLoading = true;
   File? _selectedImage;
 
+
+  Future<void> fetchMessages() async {
+    try {
+      final response = await http.get(
+        Uri.parse('${Constants.uri}/messages/${widget.currentUser}/${widget.receiverUser}'),
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> messagesJson = json.decode(response.body);
+        setState(() {
+          messages = messagesJson.map((msg) => {
+            'sender': msg['sender'].toString(),
+            'message': msg['message'].toString(),
+            'timestamp': msg['timestamp'].toString(),
+          }).toList();
+          _isLoading = false;
+        });
+      } else {
+        throw Exception("Failed to load messages");
+      }
+    } catch (e) {
+      print("Error fetching messages: $e");
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +64,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (!_socketService.isConnected) {
       _socketService.connect();
     }
+
 
     _socketService.socket.on('receiveMessage', (data) {
       if (mounted) {
@@ -265,15 +296,94 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: EdgeInsets.only(left: 16, bottom: 4),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text("User is typing...",
-                    style: TextStyle(fontSize: 12, color: Colors.grey)),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 36,
+                        child: Stack(
+                          children: [
+                            _buildDot(0, 1.0),
+                            _buildDot(12, 1.5),
+                            _buildDot(24, 1.0),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        "typing...",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            
+            // Message input
+            Container(
+              margin: EdgeInsets.all(12),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.image_outlined, color: Colors.white70),
+                    onPressed: _pickAndSendImage,
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      onChanged: (text) {
+                        setState(() {
+                          _canSendMessage = text.isNotEmpty;
+                        });
+                      },
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Type a message...",
+                        hintStyle: TextStyle(color: Colors.white54),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 4),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: _canSendMessage ? Colors.white24 : Colors.transparent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.send_rounded,
+                        size: 20,
+                        color: _canSendMessage ? Colors.white : Colors.white38,
+                      ),
+                      onPressed: _canSendMessage ? () => sendMessage() : null,
+                    ),
+                  ),
+                ],
               ),
             ),
-          _buildMessageInput(),
-        ],
+          ],
+        ),
       ),
     );
   }
+
 
   Widget _buildMessageInput() {
     return Padding(

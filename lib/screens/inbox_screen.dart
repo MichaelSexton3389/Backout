@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:BackOut/screens/chat_screen.dart';
 import 'package:BackOut/screens/ClubScreen.dart';
 import 'package:BackOut/screens/find_clubs_screen.dart'; // New import
+import 'package:BackOut/utils/constants.dart';
+
 
 class InboxScreen extends StatefulWidget {
   final String currentUser; // Logged-in user
@@ -35,7 +37,7 @@ class _InboxScreenState extends State<InboxScreen> with SingleTickerProviderStat
   Future<void> fetchUsers() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/api/user/users'),
+        Uri.parse('${Constants.uri}/api/user/users'),
       );
       if (response.statusCode == 200) {
         List<dynamic> usersJson = json.decode(response.body);

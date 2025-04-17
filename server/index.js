@@ -39,6 +39,7 @@ app.use(messageRouter);
 
 setupMessageSocket(io);
 
+
 app.get("/", (req, res) => {
   res.send("Hello from the backend server!");
 });

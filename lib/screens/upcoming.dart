@@ -12,6 +12,8 @@ import 'package:BackOut/screens/inbox_screen.dart';
 import 'package:BackOut/screens/ProfileScreen.dart';
 import 'package:BackOut/screens/calendar_screen.dart';
 
+import 'package:BackOut/utils/constants.dart';
+
 class UpcomingScreen extends StatelessWidget {
   const UpcomingScreen({Key? key}) : super(key: key);
 
@@ -329,7 +331,8 @@ class UpcomingScreen extends StatelessWidget {
 }
 
 Future<List<dynamic>> fetchPalActivities(String userId) async {
-  final response = await http.get(Uri.parse('http://localhost:3000/api/user/$userId/pals/upcoming-activity-details'));
+  final response = await http.get(Uri.parse('${Constants.uri}/api/user/$userId/pals/upcoming-activity-details'));
+
 
   if (response.statusCode == 200) {
     final jsonData = json.decode(response.body);
