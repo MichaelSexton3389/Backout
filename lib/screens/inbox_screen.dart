@@ -6,6 +6,7 @@ import 'package:BackOut/screens/ClubScreen.dart';
 import 'package:BackOut/screens/find_clubs_screen.dart'; // New import
 import 'package:BackOut/utils/constants.dart';
 
+
 class InboxScreen extends StatefulWidget {
   final String currentUser; // Logged-in user
 

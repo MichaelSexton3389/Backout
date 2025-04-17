@@ -292,6 +292,7 @@ userRouter.get("/:userId/pals/past-activity-details", async (req, res) => {
   }
 });
 
+
 userRouter.patch('/:userId/streak', async (req, res) => {
   try {
     const user = await User.findById(req.params.userId, 'Streak');
@@ -354,6 +355,7 @@ userRouter.patch('/:userId/interests', async (req, res) => {
     res.status(500).json({ msg: 'Server error' });
   }
 });
+
 
 
 

@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:BackOut/services/socket_service.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:BackOut/services/gcs_services.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:BackOut/utils/constants.dart';
@@ -10,6 +12,7 @@ import 'package:BackOut/utils/constants.dart';
 class ChatScreen extends StatefulWidget {
   final String currentUser;
   final String receiverUser;
+ main
   ChatScreen({required this.currentUser, required this.receiverUser});
 
   @override
@@ -23,6 +26,8 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isTyping = false;
   bool _canSendMessage = false;
   bool _isLoading = true;
+  File? _selectedImage;
+
 
   Future<void> fetchMessages() async {
     try {
@@ -51,6 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+
   @override
   void initState() {
     super.initState();
@@ -59,21 +65,18 @@ class _ChatScreenState extends State<ChatScreen> {
       _socketService.connect();
     }
 
-    Future.delayed(Duration(seconds: 1), () {
-      setState(() {
-        _isLoading = false;
-      });
-    });
 
     _socketService.socket.on('receiveMessage', (data) {
       if (mounted) {
         bool isDuplicate = messages.any((msg) =>
-            msg['message'] == data['message'] && msg['sender'] == data['sender']);
+            msg['message'] == data['message'] &&
+            msg['sender'] == data['sender']);
         if (!isDuplicate) {
           setState(() {
             messages.add({
               'sender': data['sender'],
-              'message': data['message'],
+              'message': data['message'] ?? "",
+              'imageUrl': data['imageUrl'] ?? "",
               'timestamp': DateTime.now().toIso8601String(),
             });
           });
@@ -90,51 +93,113 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  Future<void> _pickAndSendImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+  // Function to fetch messages
+  Future<void> fetchMessages() async {
+    try {
+      final response = await http.get(Uri.parse(
+          '${Constants.uri}${widget.currentUser}/${widget.receiverUser}'));
 
-    if (image != null) {
-      final bytes = await File(image.path).readAsBytes();
-      final base64Image = base64Encode(bytes);
-
-      sendMessage(isImage: true);
-
-      setState(() {
-        messages.add({
-          'sender': widget.currentUser,
-          'message': base64Image,
-          'timestamp': DateTime.now().toIso8601String(),
-          'isImage': 'true',
+      if (response.statusCode == 200) {
+        List<dynamic> messagesJson = json.decode(response.body);
+        setState(() {
+          messages = messagesJson
+              .map((msg) => {
+                    'sender': msg['sender'].toString(),
+                    'message': msg['message'].toString(),
+                    'imageUrl': msg['imageUrl']?.toString() ?? "",
+                    'timestamp': msg['timestamp'].toString(),
+                  })
+              .toList();
+          _isLoading = false;
         });
+      } else {
+        throw Exception("Failed to load messages");
+      }
+    } catch (e) {
+      print("Error fetching messages: $e");
+      setState(() {
+        _isLoading = false;
       });
     }
   }
 
-  void sendMessage({bool isImage = false}) {
-    if (_messageController.text.isNotEmpty || isImage) {
-      _socketService.sendMessage(
-        widget.currentUser,
-        widget.receiverUser,
-        _messageController.text,
-        isImage: isImage,
-      );
+  Future<void> pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      File selectedImage = File(pickedFile.path);
+
       setState(() {
-        messages.add({
-          'sender': widget.currentUser,
-          'message': _messageController.text,
-          'timestamp': DateTime.now().toIso8601String(),
-          'isImage': isImage.toString(),
-        });
-        _canSendMessage = false;
+        _selectedImage = selectedImage; // Show selected image in the UI
       });
-      _messageController.clear();
+
+      try {
+        // Upload the image to Google Cloud Storage and get the image URL
+        String? imageUrl = await GCSService.uploadImageToGCS(selectedImage);
+
+        if (imageUrl != null) {
+          print("Image uploaded successfully: $imageUrl");
+          // Send the image message after image is uploaded
+          sendMessage(
+            widget.currentUser,
+            widget.receiverUser,
+            '', // Empty text, as this is just an image
+            imageUrl, // Pass the image URL here
+          );
+        } else {
+          print("Image upload failed");
+        }
+      } catch (e) {
+        print("Error uploading image: $e");
+      }
+    }
+  }
+
+  Future<void> sendMessage(
+      String sender, String receiver, String message, String? imageUrl) async {
+    String textMessage = message.trim();
+
+    if (textMessage.isNotEmpty || imageUrl != null) {
+      setState(() {
+        _isLoading =
+            true; // Show loading spinner while the message is being sent
+      });
+
+      try {
+        // Send the message along with the image URL (which is a String?)
+        await _socketService.sendMessage(
+          sender,
+          receiver,
+          textMessage,
+          imageUrl, // Pass the image URL here (String?)
+        );
+
+        setState(() {
+          // After sending, update the messages list and reset the UI
+          messages.add({
+            'sender': sender,
+            'message': textMessage,
+            'imageUrl':
+                imageUrl ?? '', // If imageUrl is null, send an empty string
+            'timestamp': DateTime.now().toIso8601String(),
+          });
+          _messageController.clear();
+          _selectedImage = null;
+          _isLoading = false;
+          _canSendMessage = false;
+        });
+      } catch (e) {
+        print("Error sending message: $e");
+        setState(() {
+          _isLoading = false; // Stop loading if there's an error
+        });
+      }
     }
   }
 
   @override
   void dispose() {
-    print("🚀 ChatScreen dispose() called!");
     _socketService.socket.off('receiveMessage');
     _messageController.dispose();
     super.dispose();
@@ -142,181 +207,94 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF6A1B1A), // Deep red
-            Color(0xFF0D3B4C), // Dark bluish
-          ],
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.white24,
-                radius: 18,
-                child: Text(
-                  widget.receiverUser[0].toUpperCase(),
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-              SizedBox(width: 10),
-              Text(
-                widget.receiverUser,
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-              ),
-            ],
-          ),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.more_vert, color: Colors.white),
-              onPressed: () {},
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: _isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                      itemCount: messages.length,
-                      itemBuilder: (context, index) {
-                        bool isMe = messages[index]['sender'] == widget.currentUser;
-                        bool isImage = messages[index]['isImage'] == 'true';
-                        
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 16),
-                          child: Row(
-                            mainAxisAlignment: isMe
-                                ? MainAxisAlignment.end
-                                : MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              if (!isMe)
-                                CircleAvatar(
-                                  backgroundColor: Colors.white24,
-                                  radius: 16,
-                                  child: Text(
-                                    messages[index]['sender']![0].toUpperCase(),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              if (!isMe) SizedBox(width: 8),
-                              
-                              // Message bubble
-                              Flexible(
-                                child: Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: MediaQuery.of(context).size.width * 0.75,
-                                  ),
-                                  padding: isImage
-                                      ? EdgeInsets.all(4)
-                                      : EdgeInsets.symmetric(
-                                          horizontal: 16,
-                                          vertical: 12,
-                                        ),
-                                  decoration: BoxDecoration(
-                                    color: isMe
-                                        ? Colors.white.withOpacity(0.2)
-                                        : Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(18),
-                                      topRight: Radius.circular(18),
-                                      bottomLeft: isMe
-                                          ? Radius.circular(18)
-                                          : Radius.circular(4),
-                                      bottomRight: isMe
-                                          ? Radius.circular(4)
-                                          : Radius.circular(18),
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 5,
-                                        offset: Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: isImage
-                                      ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(14),
-                                          child: Image.memory(
-                                            base64Decode(messages[index]['message']!),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        )
-                                      : Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              messages[index]['message']!,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 15,
-                                              ),
-                                            ),
-                                            SizedBox(height: 4),
-                                            Text(
-                                              DateFormat('h:mm a').format(
-                                                DateTime.parse(
-                                                  messages[index]['timestamp']!,
-                                                ),
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.white70,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                ),
+    return Scaffold(
+      appBar: AppBar(title: Text("Chat")),
+      body: Column(
+        children: [
+          Expanded(
+            child: _isLoading
+                ? Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      bool isMe =
+                          messages[index]['sender'] == widget.currentUser;
+                      bool hasImage = messages[index]['imageUrl'] != "";
+
+                      return Row(
+                        mainAxisAlignment: isMe
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        children: [
+                          if (!isMe)
+                            CircleAvatar(
+                              backgroundColor: Colors.blueGrey,
+                              child: Text(
+                                messages[index]['sender']![0].toUpperCase(),
+                                style: TextStyle(color: Colors.white),
                               ),
-                              
-                              if (isMe) SizedBox(width: 8),
-                              if (isMe)
-                                CircleAvatar(
-                                  backgroundColor: Colors.white24,
-                                  radius: 16,
-                                  child: Text(
-                                    messages[index]['sender']![0].toUpperCase(),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
+                            ),
+                          SizedBox(width: isMe ? 0 : 6),
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 8),
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color:
+                                  isMe ? Colors.blueAccent : Colors.grey[300],
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                                bottomLeft:
+                                    isMe ? Radius.circular(12) : Radius.zero,
+                                bottomRight:
+                                    isMe ? Radius.zero : Radius.circular(12),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (hasImage)
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 8),
+                                    child: Image.network(
+                                      messages[index]['imageUrl']!,
+                                      width: 200,
+                                      height: 200,
+                                      fit: BoxFit.cover,
                                     ),
                                   ),
+                                if (messages[index]['message']!.isNotEmpty)
+                                  Text(
+                                    messages[index]['message']!,
+                                    style: TextStyle(
+                                      color: isMe ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                SizedBox(height: 4),
+                                Text(
+                                  DateFormat('h:mm a').format(
+                                    DateTime.parse(
+                                        messages[index]['timestamp']!),
+                                  ),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color:
+                                        isMe ? Colors.white70 : Colors.black54,
+                                  ),
                                 ),
-                            ],
+                              ],
+                            ),
                           ),
-                        );
-                      },
-                    ),
-            ),
-            
-            // Typing indicator
-            if (_isTyping)
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                        ],
+                      );
+                    },
+                  ),
+          ),
+          if (_isTyping)
+            Padding(
+              padding: EdgeInsets.only(left: 16, bottom: 4),
+              child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -405,22 +383,54 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-  
-  Widget _buildDot(double leftPosition, double scale) {
-    return Positioned(
-      left: leftPosition,
-      child: Container(
-        width: 8,
-        height: 8,
-        decoration: BoxDecoration(
-          color: Colors.white70,
-          shape: BoxShape.circle,
-        ),
-        child: AnimatedScale(
-          scale: scale,
-          duration: Duration(milliseconds: 600),
-          curve: Curves.easeInOut,
-        ),
+
+
+  Widget _buildMessageInput() {
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.image, color: Colors.blueAccent),
+            onPressed: pickAndUploadImage,
+          ),
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              decoration: InputDecoration(
+                hintText: "Type a message",
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _canSendMessage =
+                      value.trim().isNotEmpty || _selectedImage != null;
+                });
+              },
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.send,
+                color: _canSendMessage ? Colors.blueAccent : Colors.grey),
+            onPressed: _canSendMessage
+                ? () async {
+                    String textMessage = _messageController.text.trim();
+
+                    // If there's an image, upload it first and get the URL
+                    String? imageUrl;
+                    if (_selectedImage != null) {
+                      imageUrl =
+                          await GCSService.uploadImageToGCS(_selectedImage!);
+                    }
+
+                    // Send the message with the image URL or just the text message
+                    sendMessage(widget.currentUser, widget.receiverUser,
+                        textMessage, imageUrl);
+                  }
+                : null,
+          )
+        ],
       ),
     );
   }
