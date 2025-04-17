@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:BackOut/screens/login_screen.dart';
 import 'package:BackOut/services/auth_services.dart';
-import 'package:BackOut/screens/registration.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -58,7 +57,7 @@ class _SignupScreenState extends State<SignupScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => const RegistrationScreen(),
+          builder: (_) => const LoginScreen(),
         ),
       );
     } else {
