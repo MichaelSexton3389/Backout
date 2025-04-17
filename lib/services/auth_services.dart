@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class AuthService {
-  void signUpUser(
+  Future<bool> signUpUser(
       {required BuildContext context,
       required String email,
       required String password,
@@ -44,9 +44,11 @@ class AuthService {
 
       print('Response status code: ${res.statusCode}');
       print('Response body: ${res.body}');
+      return true;
     } catch (e) {
       print('Error: $e');
       showSnackBar(context, e.toString());
+      return false;
     }
   }
 
