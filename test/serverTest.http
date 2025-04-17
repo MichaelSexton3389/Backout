@@ -184,3 +184,26 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmO
 GET http://localhost:3000/api/user/67a294df86e65bfed00aa6c9/activity-count
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+
+###
+# Test: Get Upcoming Activity Details for a User (200 OK)
+GET http://localhost:3000/api/user/67a294df86e65bfed00aa6c9/upcoming-activity-details
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+Content-Type: application/json
+
+###
+# Test: No activities found for this user (404)
+GET http://localhost:3000/api/user/000000000000000000000000/upcoming-activity-details
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+Content-Type: application/json
+
+###
+# Test: Unauthorized request for upcoming activities (401)
+GET http://localhost:3000/api/user/67a294df86e65bfed00aa6c9/upcoming-activity-details
+Content-Type: application/json
+
+###
+# Test: Invalid userId format causes server error (500)
+GET http://localhost:3000/api/user/not-a-valid-id/upcoming-activity-details
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YTI5NGRmODZlNjViZmVkMDBhYTZjOSIsImlhdCI6MTc0MDUyMDEzMH0.n_fyvSEy0i2HW3DfGJ83Ni_ggP1_IygvzkLNxi8qgSQ
+Content-Type: application/json
