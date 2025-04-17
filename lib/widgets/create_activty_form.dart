@@ -107,7 +107,7 @@ void initState() {
     print("Location being sent to invite overlay: '${_locationController.text}'");
     print("description being sent to invite overlay: '${ _descriptionController.text}'");
     print("bgImg being sent to invite overlay: '$selectedImageUrl'");
-    print("date being sent to invite overlay: '${selectedDateTime.toIso8601String()}'");
+    print("date being sent to invite overlay: '${selectedDateTime.subtract(Duration(hours: 6)).toIso8601String()}'");
 
   showModalBottomSheet(
     context: context,
@@ -124,7 +124,7 @@ void initState() {
               location: _locationController.text,
               description: _descriptionController.text,
               bgImg: selectedImageUrl,
-              date: selectedDateTime.toIso8601String(),
+              date: selectedDateTime.subtract(Duration(hours: 6)).toIso8601String(),
             ),
           ),
         ),
