@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'package:BackOut/utils/constants.dart';
 
 class ChatScreen extends StatefulWidget {
   final String currentUser;
@@ -26,7 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> fetchMessages() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3000/messages/${widget.currentUser}/${widget.receiverUser}'),
+        Uri.parse('${Constants.uri}/messages/${widget.currentUser}/${widget.receiverUser}'),
       );
 
       if (response.statusCode == 200) {
