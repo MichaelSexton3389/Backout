@@ -46,6 +46,20 @@ const userSchema = mongoose.Schema({
          type: mongoose.Schema.Types.ObjectId,
           ref: "Activity"
          }], // Activity participation
+    Streak: {
+      current: {
+        type: Number,
+        default: 0
+      },
+      lastChanged: {
+        type: Date,
+        default: Date.now
+      }
+    },
+
+    Badges: [{
+        type: String
+    }],
 
 
     created_at: {
