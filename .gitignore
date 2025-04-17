@@ -46,3 +46,4 @@ app.*.map.json
 
 # Hiding credentials for consistency
 assets/service-account.json
+assets/backout-452920-730288bde527.json
