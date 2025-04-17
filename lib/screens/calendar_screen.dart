@@ -12,6 +12,7 @@ import 'package:BackOut/screens/inbox_screen.dart';
 import 'package:BackOut/screens/ProfileScreen.dart';
 import 'package:BackOut/widgets/modal_background.dart';
 import 'package:BackOut/widgets/create_activty_form.dart';
+import 'package:BackOut/utils/constants.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -45,7 +46,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   Future<void> _loadEvents() async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
-    final url = Uri.parse('http://localhost:3000/api/user/${user.id}/upcoming-activity-details');
+    final url = Uri.parse('${Constants.uri}/api/user/${user.id}/upcoming-activity-details');
 
     try {
       final response = await http.get(

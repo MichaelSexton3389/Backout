@@ -18,7 +18,7 @@ import 'package:BackOut/screens/leaderboard.dart'; // Add this import
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
+import 'package:BackOut/utils/constants.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> fetchActivities() async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
-    final url = Uri.parse('http://localhost:3000/api/user/${user.id}/upcoming-activity-details');
+    final url = Uri.parse('${Constants.uri}/api/user/${user.id}/upcoming-activity-details');
     try {
       final response = await http.get(
         url,

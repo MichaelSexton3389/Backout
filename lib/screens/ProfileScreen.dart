@@ -8,6 +8,7 @@ import 'package:palette_generator/palette_generator.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:BackOut/utils/constants.dart';
 
 class ProfileScreen extends StatefulWidget {
   final User currentUser; // The user using the app
@@ -89,7 +90,7 @@ void showEditProfilePicModal() {
 void updateProfilePicture(String newImageUrl) async {
   final userId = widget.profileUser.id;
   final response = await http.put(
-    Uri.parse("http://localhost:3000/api/user/update-photo"),
+    Uri.parse("${Constants.uri}/api/user/update-photo"),
     headers: {"Content-Type": "application/json"},
     body: jsonEncode({
       "userId": userId,
@@ -108,7 +109,7 @@ void updateProfilePicture(String newImageUrl) async {
   void fetchPalCount() async {
     final userId = widget.profileUser.id;
     final response = await http
-        .get(Uri.parse("http://localhost:3000/api/user/$userId/pal-count"));
+        .get(Uri.parse("${Constants.uri}/api/user/$userId/pal-count"));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -119,7 +120,7 @@ void updateProfilePicture(String newImageUrl) async {
 
   void fetchActivityCount() async {
     final userId = widget.profileUser.id;
-    final response = await http.get(Uri.parse("http://localhost:3000/api/user/$userId/activity-count"));
+    final response = await http.get(Uri.parse("${Constants.uri}/api/user/$userId/activity-count"));
 
     if (response.statusCode == 200) {
       setState(() {
@@ -278,7 +279,7 @@ void updateProfilePicture(String newImageUrl) async {
   void updateBio() async {
     final userId = widget.profileUser.id;
     final response = await http.put(
-      Uri.parse("http://localhost:3000/api/user/update-bio"),
+      Uri.parse("${Constants.uri}/api/user/update-bio"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "userId": userId,
