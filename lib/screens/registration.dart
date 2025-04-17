@@ -1,8 +1,7 @@
-import 'package:BackOut/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:BackOut/services/user_service.dart';
-import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -12,36 +11,56 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  // Default placeholder until fetched
+  String displayName = 'You';
+
+  final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final List<String> activities = [
-    'swimming.svg', 'biking.svg', 'lifting.svg', 'running.svg',
-    'skiing.svg', 'snowboarding.svg', 'hiking.svg', 'hockey.svg',
-    'soccer.svg', 'kayaking.svg', 'basketball.svg', 'three_circle_fill.svg',
+    'swimming.png', 'biking.png', 'lifting.png', 'running.png',
+    'skiing.png', 'snowboarding.png', 'hiking.png', 'hockey.png',
+    'soccer.png', 'kayaking.png', 'basketball.png', 'three_circle_fill.png',
   ];
   final Set<int> selected = {};
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    try {
+      final uri = Uri.parse('https://yourapi.com/users');
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        final List<dynamic> users = jsonDecode(response.body);
+        if (users.isNotEmpty && users[0]['name'] != null) {
+          setState(() {
+            displayName = users[0]['name'];
+          });
+        }
+      } else {
+        debugPrint('Failed to load user name: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching user name: $e');
+    }
+  }
+
   void toggleSelection(int index) {
     setState(() {
-      if (selected.contains(index)) selected.remove(index);
-      else selected.add(index);
+      if (selected.contains(index)) {
+        selected.remove(index);
+      } else {
+        selected.add(index);
+      }
     });
   }
 
-@override
-void initState() {
-  super.initState();
-  for (final file in activities) {
-    rootBundle
-      .loadString('assets/$file')
-      .then((s) => print('$file loaded (${s.length} chars)'))
-      .catchError((e) => print('Failed to load $file: $e'));
-  }
-}
-
-   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Remove the solid background; use a gradient instead
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -72,19 +91,20 @@ void initState() {
                 Center(
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundImage: AssetImage('assets/profile_placeholder.png'),
+                    backgroundImage:
+                        AssetImage('assets/profile_placeholder.png'),
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'About You',
-                  style: TextStyle(
+                // Display fetched name
+                Text(
+                  'About $displayName',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
                 const SizedBox(height: 12),
                 TextField(
                   controller: descriptionController,
@@ -124,16 +144,14 @@ void initState() {
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: isSelected ? Colors.lightBlue : const Color.fromARGB(255, 255, 255, 255),
+                            color: isSelected ? Colors.lightBlue : Colors.white,
                           ),
                           padding: const EdgeInsets.all(8),
-                          child: SvgPicture.asset(
-                            'assets/${activities[i]}',
-                            height: 150,
-                            width: 150,
-                            color: isSelected ? Colors.white : Colors.black,
+                          child: Image.asset((
+                            'assets/${activities[i]}'
                           ),
                         ),
+                        )
                       );
                     }),
                   ),

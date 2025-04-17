@@ -36,21 +36,21 @@ flutter:
   uses-material-design: true
   assets:
     - assets/logo.png
-    - assets/hockey.svg
-    - assets/kayaking.svg
-    - assets/lifting.svg
+    - assets/hockey.png
+    - assets/kayaking.png
+    - assets/lifting.png
     - assets/profile_placeholder.png
-    - assets/running.svg
-    - assets/skiing.svg
-    - assets/snowboarding.svg
-    - assets/soccer.svg
-    - assets/swimming.svg
-    - assets/three_circle_fill.svg
+    - assets/running.png
+    - assets/skiing.png
+    - assets/snowboarding.png
+    - assets/soccer.png
+    - assets/swimming.png
+    - assets/three_circle_fill.png
     - assets/pexels.json
     - assets/mountain_logo.svg
     - assets/post img.png
-    - assets/biking.svg
-    - assets/football.svg
-    - assets/hiking.svg
-    - assets/swimming.svg
-    - assets/basketball.svg
+    - assets/biking.png
+    - assets/football.png
+    - assets/hiking.png
+    - assets/swimming.png
+    - assets/basketball.png
