@@ -193,7 +193,7 @@ void initState() {
                           child: const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             child: Text(
-                              'BackOff AI',
+                              'Create',
                               style: TextStyle(color: Colors.black),
                             ),
                           ),
@@ -482,10 +482,10 @@ void initState() {
                             ),
                             const SizedBox(height: 16),
                             _sharedSection(Icons.photo_album, "Event Bin",
-                                "Here you and all your friends can share all the awesome pictures you guys took through out the activity."),
+                                "share pics."),
                             const SizedBox(height: 8),
                             _sharedSection(Icons.music_note, "Playlist",
-                                "Share and play your friend's favorite music on your amazing adventure."),
+                                "Share music."),
                             const SizedBox(height: 16),
                             // Extra spacing to ensure the button does not overlap content
                             const SizedBox(height: 50),
